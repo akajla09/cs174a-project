@@ -3,7 +3,6 @@
 	Current implementation of asteroid (cube) adapted from learningwebgl.com
 
 	TODO: change geometry of asteroid from cube to actual asteroid
-	TODO: implement AsteroidField
 */
 
 
@@ -106,5 +105,26 @@ Asteroid.prototype.draw = function(gl, shaderProgram) {
 	gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, 4, gl.FLOAT, false, 0, 0);
 	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
 	gl.drawElements(gl.TRIANGLES, 36, gl.UNSIGNED_SHORT, 0);
+}
+
+// returns array of random transformation matrices that are used to draw an asteroid field
+Asteroid.prototype.createAsteroidField = function(numAsteroids) {
+	var asteroidArray = [];
+	for (var i = 0; i < numAsteroids; i++) {
+		var asteroidMatrix = mat4.create();
+		mat4.identity(asteroidMatrix);
+		// random scale vector:
+		var randS = (4.0 * Math.random()) + 1.0;
+		var randScale = vec3.fromValues(randS, randS, randS);
+		// random translation vector:
+		var randx = Math.random() * 50.0 * (Math.random() < 0.5 ? -1 : 1);
+		var randy = Math.random() * 50.0 * (Math.random() < 0.5 ? -1 : 1);
+		var randz = Math.random() * 50.0 * (Math.random() < 0.5 ? -1 : 1);
+		var randTrans = vec3.fromValues(randx, randy, randz);
+		mat4.scale(asteroidMatrix, asteroidMatrix, randScale);
+		mat4.translate(asteroidMatrix, asteroidMatrix, randTrans);
+		asteroidArray.push(asteroidMatrix);
+	}
+	return asteroidArray;
 }
 

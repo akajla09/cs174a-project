@@ -123,6 +123,10 @@
         gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
     }
 
+	function degreesToRadians(degrees) {
+		return degrees * (Math.PI / 180.0);
+	}	
+
 /*
 	Init & Draw Scene
 */
@@ -130,9 +134,17 @@
 	var asteroid;
 	var squareRotation = 0.0;
 	var lastTime;
+	var pressedKeys = [];
+	var xPos = 0.0;
+	var yPos = 0.0;
+	var zPos = -30.0;
+	var vertAngle = 0.0;
+	var horizAngle = 0.0;
+	var asteroidArray = [];
 
     function initBuffers() {
 		asteroid = new Asteroid(0);
+		asteroidArray = asteroid.createAsteroidField(150);
 		asteroid.initBuffers(gl, shaderProgram);
     }
 
@@ -141,27 +153,75 @@
         gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-		mat4.perspective(pMatrix, 45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0);
+		mat4.perspective(pMatrix, 45, gl.viewportWidth / gl.viewportHeight, 0.1, 2000.0);
 
-		var identity = mat4.create();
-		var rotation = mat4.create();
-		mat4.identity(identity);
-		mat4.identity(mvMatrix);
-		mat4.translate(mvMatrix, identity, [0.0, 0.0, -8.0]);
-		mat4.rotate(mvMatrix, mvMatrix, squareRotation, [1.0, 1.0, 0.0]);
-		setMatrixUniforms();
-		asteroid.draw(gl, shaderProgram);
+		// Draw Asteroid Field
+		for (var i = 0; i < asteroidArray.length; i++) {
+			// Set camera:
+			mat4.identity(mvMatrix);
+			mat4.rotate(mvMatrix, mvMatrix, vertAngle, [1.0, 0.0, 0.0]);
+			mat4.rotate(mvMatrix, mvMatrix, horizAngle, [0.0, 1.0, 0.0]);
+			mat4.translate(mvMatrix, mvMatrix, [xPos, yPos, zPos]);
+
+			// Set model-view (asteroid matrix):
+			//mat4.rotate(asteroidArray[i], asteroidArray[i], squareRotation, [0.0, 1.0, 0.0]);
+			mat4.multiply(mvMatrix, mvMatrix, asteroidArray[i]);
+			setMatrixUniforms();
+			asteroid.draw(gl, shaderProgram);
+		}
 
 		var currentTime = (new Date).getTime();
 		if (currentTime - lastTime >= 10) {
 			var change = currentTime - lastTime;
-			squareRotation += (1 * change) / 1000.0;
+			squareRotation += (0.001 * change) / 1000.0;
 		}
 		lastTime = currentTime;
     }
 
+	function handleKeyDown(event) {
+		pressedKeys[event.keyCode] = true;
+	}
+
+	function handleKeyUp(event) {
+		pressedKeys[event.keyCode] = false;
+	}
+	
+	function handleKeyInput() {
+		var vertRad = degreesToRadians(vertAngle);
+		var horizRad = degreesToRadians(horizAngle);
+		// UP
+		if (pressedKeys[38]) {
+			vertAngle += -0.04;
+		}
+		// DOWN
+		if (pressedKeys[40]) {
+			vertAngle += 0.04;
+		}
+		// LEFT
+		if (pressedKeys[37]) {
+			horizAngle += -0.04;
+		}
+		// RIGHT
+		if (pressedKeys[39]) {
+			horizAngle += 0.04;
+		}
+		// move forward (z)
+		if (pressedKeys[90]) {
+			xPos += Math.sin(horizRad) * 0.9;
+			yPos += Math.sin(vertRad) * 0.9;
+			zPos += Math.cos(horizRad) * 0.9;
+		}
+		// move backward (x)
+		if (pressedKeys[88]) {
+			xPos += Math.sin(horizRad) * -0.9;
+			yPos += Math.sin(vertRad) * -0.9;
+			zPos += Math.cos(horizRad) * -0.9;
+		}
+	}
+
 	function tick() {
 		requestAnimFrame(tick);
+		handleKeyInput();
 		drawScene();
 	}
 
@@ -175,6 +235,9 @@
         gl.clearColor(0.0, 0.0, 0.0, 1.0); // black background
         gl.enable(gl.DEPTH_TEST);
 
+		document.onkeydown = handleKeyDown;
+		document.onkeyup = handleKeyUp;
+
         tick();
     }
 
@@ -183,7 +246,12 @@
 </head>
 
 <body onload="webGLStart();">
-	<canvas id="lesson01-canvas" style="border: none;" width="700" height="600"></canvas>
-</body>
+	<canvas id="lesson01-canvas" style="border: none;" width="1000" height="600"></canvas>
+	<div id="instructions">
+		Move forward: z </br>
+		Move backward: x </br>
+		up/down/left/right: arrow keys</br>
+	</div>
+</body>	
 
 </html>
