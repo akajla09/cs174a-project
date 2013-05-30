@@ -1,33 +1,42 @@
 <html>
 
 <head>
-<title>Learning WebGL &mdash; lesson 1</title>
+<title>Asteroids with Friends</title>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 
 <script type="text/javascript" src="/javascripts/gl-matrix.min.js"></script>
+<script type="text/javascript" src="/javascripts/google-webgl-utils.js"></script>
+<script type="text/javascript" src="/javascripts/asteroids.js"></script>
 
 <script id="shader-fs" type="x-shader/x-fragment">
     precision mediump float;
+	varying vec4 vColor;
 
     void main(void) {
-        gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+        gl_FragColor = vColor;
     }
 </script>
 
 <script id="shader-vs" type="x-shader/x-vertex">
     attribute vec3 aVertexPosition;
+	attribute vec4 aVertexColor;
 
     uniform mat4 uMVMatrix;
     uniform mat4 uPMatrix;
 
+	varying vec4 vColor;
+
     void main(void) {
         gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+		vColor = aVertexColor;
     }
 </script>
 
 
 <script type="text/javascript">
-
+/*
+	WEBGL Initialization & Utility functions
+*/
     var gl;
     function initGL(canvas) {
         try {
@@ -90,13 +99,16 @@
         gl.linkProgram(shaderProgram);
 
         if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
-            alert("Could not initialise shaders");
+            alert("Could not initialize shaders");
         }
 
         gl.useProgram(shaderProgram);
 
         shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
         gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
+
+		shaderProgram.vertexColorAttribute = gl.getAttribLocation(shaderProgram, "aVertexColor");
+		gl.enableVertexAttribArray(shaderProgram.vertexColorAttribute);
 
         shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
         shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
@@ -111,34 +123,17 @@
         gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
     }
 
+/*
+	Init & Draw Scene
+*/
 
-
-    var triangleVertexPositionBuffer;
-    var squareVertexPositionBuffer;
+	var asteroid;
+	var squareRotation = 0.0;
+	var lastTime;
 
     function initBuffers() {
-        triangleVertexPositionBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer);
-        var vertices = [
-             0.0,  1.0,  0.0,
-            -1.0, -1.0,  0.0,
-             1.0, -1.0,  0.0
-        ];
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-        triangleVertexPositionBuffer.itemSize = 3;
-        triangleVertexPositionBuffer.numItems = 3;
-
-        squareVertexPositionBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
-        vertices = [
-             1.0,  1.0,  0.0,
-            -1.0,  1.0,  0.0,
-             1.0, -1.0,  0.0,
-            -1.0, -1.0,  0.0
-        ];
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-        squareVertexPositionBuffer.itemSize = 3;
-        squareVertexPositionBuffer.numItems = 4;
+		asteroid = new Asteroid(0);
+		asteroid.initBuffers(gl, shaderProgram);
     }
 
 
@@ -146,24 +141,29 @@
         gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
+		mat4.perspective(pMatrix, 45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0);
 
-        mat4.identity(mvMatrix);
+		var identity = mat4.create();
+		var rotation = mat4.create();
+		mat4.identity(identity);
+		mat4.identity(mvMatrix);
+		mat4.translate(mvMatrix, identity, [0.0, 0.0, -8.0]);
+		mat4.rotate(mvMatrix, mvMatrix, squareRotation, [1.0, 1.0, 0.0]);
+		setMatrixUniforms();
+		asteroid.draw(gl, shaderProgram);
 
-        mat4.translate(mvMatrix, [-1.5, 0.0, -7.0]);
-        gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer);
-        gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, triangleVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-        setMatrixUniforms();
-        gl.drawArrays(gl.TRIANGLES, 0, triangleVertexPositionBuffer.numItems);
-
-
-        mat4.translate(mvMatrix, [3.0, 0.0, 0.0]);
-        gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
-        gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, squareVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-        setMatrixUniforms();
-        gl.drawArrays(gl.TRIANGLE_STRIP, 0, squareVertexPositionBuffer.numItems);
+		var currentTime = (new Date).getTime();
+		if (currentTime - lastTime >= 10) {
+			var change = currentTime - lastTime;
+			squareRotation += (1 * change) / 1000.0;
+		}
+		lastTime = currentTime;
     }
 
+	function tick() {
+		requestAnimFrame(tick);
+		drawScene();
+	}
 
 
     function webGLStart() {
@@ -172,26 +172,18 @@
         initShaders();
         initBuffers();
 
-        gl.clearColor(0.0, 0.0, 0.0, 1.0);
+        gl.clearColor(0.0, 0.0, 0.0, 1.0); // black background
         gl.enable(gl.DEPTH_TEST);
 
-        drawScene();
+        tick();
     }
-
 
 </script>
 
-
 </head>
 
-
 <body onload="webGLStart();">
-    <a href="http://learningwebgl.com/blog/?p=28">&lt;&lt; Back to Lesson 1</a><br />
-
-    <canvas id="lesson01-canvas" style="border: none;" width="500" height="500"></canvas>
-
-    <br/>
-    <a href="http://learningwebgl.com/blog/?p=28">&lt;&lt; Back to Lesson 1</a><br />
+	<canvas id="lesson01-canvas" style="border: none;" width="700" height="600"></canvas>
 </body>
 
 </html>
