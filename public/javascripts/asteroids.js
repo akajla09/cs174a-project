@@ -1,125 +1,102 @@
 /*
-	Defines AsteroidField and Asteroid
-	Current implementation of asteroid (cube) adapted from learningwebgl.com
-
-	TODO: change geometry of asteroid from cube to actual asteroid
+	Asteroid implementation
+	Sphere implementation adapted from learningwebgl.com
 */
 
-
-var vertices = [
-    // Front face
-    -1.0, -1.0,  1.0,
-     1.0, -1.0,  1.0,
-     1.0,  1.0,  1.0,
-    -1.0,  1.0,  1.0,
-
-    // Back face
-    -1.0, -1.0, -1.0,
-    -1.0,  1.0, -1.0,
-     1.0,  1.0, -1.0,
-     1.0, -1.0, -1.0,
-
-    // Top face
-    -1.0,  1.0, -1.0,
-    -1.0,  1.0,  1.0,
-     1.0,  1.0,  1.0,
-     1.0,  1.0, -1.0,
-
-    // Bottom face
-    -1.0, -1.0, -1.0,
-     1.0, -1.0, -1.0,
-     1.0, -1.0,  1.0,
-    -1.0, -1.0,  1.0,
-
-    // Right face
-     1.0, -1.0, -1.0,
-     1.0,  1.0, -1.0,
-     1.0,  1.0,  1.0,
-     1.0, -1.0,  1.0,
-
-    // Left face
-    -1.0, -1.0, -1.0,
-    -1.0, -1.0,  1.0,
-    -1.0,  1.0,  1.0,
-    -1.0,  1.0, -1.0
-];
-
-var colors = [
-	[1.0, 0.0, 0.0, 1.0], // white
-    [1.0, 1.0, 0.0, 1.0], // red
-    [0.0, 1.0, 0.0, 1.0], // green
-    [1.0, 0.5, 0.5, 1.0], // blue
-    [1.0, 0.0, 1.0, 1.0], // yellow
-    [0.0, 0.0, 1.0, 1.0]  // purple
-];
-
-var cubeVertexIndices = [
-    0, 1, 2,      0, 2, 3,    // Front face
-    4, 5, 6,      4, 6, 7,    // Back face
-    8, 9, 10,     8, 10, 11,  // Top face
-    12, 13, 14,   12, 14, 15, // Bottom face
-    16, 17, 18,   16, 18, 19, // Right face
-    20, 21, 22,   20, 22, 23  // Left face
-];
-
-var normals = [];
-var vertexBuffer, colorBuffer;
-
-function Asteroid(asteroidIndex) {
-	var cubeColors = [];
-	var vertexBuffer, colorBuffer, indexBuffer;
-	this.index = asteroidIndex;
-	this.vertices = vertices;
-	this.normals = normals;
-	this.vertexBuffer = vertexBuffer;
-	this.colorBuffer = colorBuffer;
-	this.indexBuffer = indexBuffer;
-	for (var i = 0; i < 6; i++) {
-		var c = colors[i];
-		for (var j = 0; j < 4; j++) { 
-			cubeColors = cubeColors.concat(c);
+function Asteroid(asteroidIndex, latitudeBands, longitudeBands, radius) {
+	this.vertices = [];
+	this.normals = [];
+	this.textureCoords = [];
+	this.indices = [];
+	this.vertexBuffer;
+	this.normalBuffer;
+	this.textureCoordBuffer;
+	this.indexBuffer;
+	// Generate vertices, normals and texture coords:
+	for (var latNum = 0; latNum <= latitudeBands; latNum++) {
+		var theta = latNum * Math.PI / latitudeBands;
+		var sinTheta = Math.sin(theta);
+		var cosTheta = Math.cos(theta);
+		
+		for (var longNum = 0; longNum <= longitudeBands; longNum++) {
+			var phi = longNum * 2 * Math.PI / longitudeBands;
+			var sinPhi = Math.sin(phi);
+			var cosPhi = Math.cos(phi);
+			var x = cosPhi * sinTheta;
+			var y = cosTheta;
+			var z = sinPhi * sinTheta;
+			var u = 1 - (longNum / longitudeBands);
+			var v = latNum / latitudeBands;
+			this.normals.push(x);
+			this.normals.push(y);
+			this.normals.push(z);
+			this.textureCoords.push(u);
+			this.textureCoords.push(v);
+			this.vertices.push(radius * x);
+			this.vertices.push(radius * y);
+			this.vertices.push(radius * z);
 		}
 	}
-	this.colors = cubeColors;
+	
+	for (var latNum = 0; latNum < latitudeBands; latNum++) {
+		for (var longNum = 0; longNum < longitudeBands; longNum++) {
+			var first = (latNum * (longitudeBands + 1)) + longNum;
+			var second = first + longitudeBands + 1;
+			this.indices.push(first);	
+			this.indices.push(second);
+			this.indices.push(first + 1);
+			this.indices.push(second);
+			this.indices.push(second + 1);
+			this.indices.push(first + 1);
+		}
+	}
 }
 
-Asteroid.prototype.initBuffers = function(gl, shaderProgram) {	
+Asteroid.prototype.initBuffers = function(gl, shaderProgram) {
+	this.normalBuffer = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, this.normalBuffer);
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.normals), gl.STATIC_DRAW);
+	
 	this.vertexBuffer = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertices), gl.STATIC_DRAW);
 
-	this.colorBuffer = gl.createBuffer();
-	gl.bindBuffer(gl.ARRAY_BUFFER, this.colorBuffer);
-	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.colors), gl.STATIC_DRAW);
+	this.textureCoordBuffer = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, this.textureCoordBuffer);
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.textureCoords), gl.STATIC_DRAW);
 
 	this.indexBuffer = gl.createBuffer();	
 	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
-	gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(cubeVertexIndices), gl.STATIC_DRAW);
+	gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.indices), gl.STREAM_DRAW);
 	
 }
 
-Asteroid.prototype.draw = function(gl, shaderProgram) {
+Asteroid.prototype.draw = function(gl, shaderProgram, texture) {
 	gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
 	gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
-	gl.bindBuffer(gl.ARRAY_BUFFER, this.colorBuffer);
-	gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, 4, gl.FLOAT, false, 0, 0);
+	/*gl.bindBuffer(gl.ARRAY_BUFFER, this.normalBuffer);
+	gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, 3, gl.FLOAT, false, 0, 0);*/
+	gl.bindBuffer(gl.ARRAY_BUFFER, this.textureCoordBuffer);
+	gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, 2, gl.FLOAT, false, 0, 0);
+	gl.activeTexture(gl.TEXTURE0);
+	gl.bindTexture(gl.TEXTURE_2D, texture);
+	gl.uniform1i(shaderProgram.samplerUniform, 0);
 	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
-	gl.drawElements(gl.TRIANGLES, 36, gl.UNSIGNED_SHORT, 0);
+	gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0);
 }
 
-// returns array of random transformation matrices that are used to draw an asteroid field
+// returns array of random transformation matrices that are used to draw multiple asteroids
 Asteroid.prototype.createAsteroidField = function(numAsteroids) {
 	var asteroidArray = [];
 	for (var i = 0; i < numAsteroids; i++) {
 		var asteroidMatrix = mat4.create();
 		mat4.identity(asteroidMatrix);
 		// random scale vector:
-		var randS = (4.0 * Math.random()) + 1.0;
-		var randScale = vec3.fromValues(randS, randS, randS);
+		var randScale = vec3.fromValues((4.5 * Math.random()) + 1.5, (4.5 * Math.random()) + 1.5, (4.5 * Math.random()) + 1.5);
 		// random translation vector:
-		var randx = Math.random() * 50.0 * (Math.random() < 0.5 ? -1 : 1);
-		var randy = Math.random() * 50.0 * (Math.random() < 0.5 ? -1 : 1);
-		var randz = Math.random() * 50.0 * (Math.random() < 0.5 ? -1 : 1);
+		var randx = Math.random() * 70.0 * (Math.random() < 0.5 ? -1 : 1);
+		var randy = Math.random() * 70.0 * (Math.random() < 0.5 ? -1 : 1);
+		var randz = Math.random() * 70.0 * (Math.random() < 0.5 ? -1 : 1);
 		var randTrans = vec3.fromValues(randx, randy, randz);
 		mat4.scale(asteroidMatrix, asteroidMatrix, randScale);
 		mat4.translate(asteroidMatrix, asteroidMatrix, randTrans);
