@@ -96,7 +96,7 @@ Asteroid.prototype.createAsteroidField = function(numAsteroids) {
 		// random translation vector:
 		var randx = Math.random() * 70.0 * (Math.random() < 0.5 ? -1 : 1);
 		var randy = Math.random() * 70.0 * (Math.random() < 0.5 ? -1 : 1);
-		var randz = Math.random() * 70.0 * (Math.random() < 0.5 ? -1 : 1);
+		var randz = Math.random() * -140.0 - 20.0;
 		var randTrans = vec3.fromValues(randx, randy, randz);
 		mat4.scale(asteroidMatrix, asteroidMatrix, randScale);
 		mat4.translate(asteroidMatrix, asteroidMatrix, randTrans);

@@ -7,6 +7,7 @@
 <script type="text/javascript" src="/javascripts/gl-matrix.min.js"></script>
 <script type="text/javascript" src="/javascripts/google-webgl-utils.js"></script>
 <script type="text/javascript" src="/javascripts/asteroids.js"></script>
+<script type="text/javascript" src="/javascripts/laser.js"></script>
 
 <script id="shader-fs" type="x-shader/x-fragment">
     precision mediump float;
@@ -14,9 +15,15 @@
 	varying vec2 vTextureCoord;
 
 	uniform sampler2D uSampler;
+	uniform int renderType;
 
     void main(void) {
-		gl_FragColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
+		if (renderType == 0) {
+			gl_FragColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
+		}
+		else if (renderType == 1) {
+			gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0);
+		}
     }
 </script>
 
@@ -26,12 +33,15 @@
 
     uniform mat4 uMVMatrix;
     uniform mat4 uPMatrix;
+	uniform int renderType;
 
 	varying vec2 vTextureCoord;
 
     void main(void) {
-        gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
-		vTextureCoord = aTextureCoord;
+	    gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+		if (renderType == 0) {
+			vTextureCoord = aTextureCoord;
+		}
     }
 </script>
 
@@ -116,6 +126,7 @@
         shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
         shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
 		shaderProgram.samplerUniform = gl.getUniformLocation(shaderProgram, "uSampler");
+		shaderProgram.renderType = gl.getUniformLocation(shaderProgram, "renderType");
     }
 
 
@@ -160,20 +171,24 @@
 */
 
 	var asteroid;
+	var laser;
 	var squareRotation = 0.0;
 	var lastTime;
 	var pressedKeys = [];
 	var xPos = 0.0;
 	var yPos = 0.0;
-	var zPos = -30.0;
+	var zPos = 0.0;
 	var vertAngle = 0.0;
 	var horizAngle = 0.0;
 	var asteroidArray = [];
+	var zbulletPos = 160.0;
 
     function initBuffers() {
 		asteroid = new Asteroid(0, 5, 6, 2);
+		laser = new Laser();
 		asteroidArray = asteroid.createAsteroidField(150);
 		asteroid.initBuffers(gl, shaderProgram);
+		laser.initBuffers(gl, shaderProgram);
     }
 
 
@@ -182,13 +197,13 @@
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
 		mat4.perspective(pMatrix, 45, gl.viewportWidth / gl.viewportHeight, 0.1, 2000.0);
-
 		// Draw Asteroid Field
+		gl.uniform1i(shaderProgram.renderType, 0);
 		for (var i = 0; i < asteroidArray.length; i++) {
 			// Set camera:
 			mat4.identity(mvMatrix);
-			mat4.rotate(mvMatrix, mvMatrix, vertAngle, [1.0, 0.0, 0.0]);
-			mat4.rotate(mvMatrix, mvMatrix, horizAngle, [0.0, 1.0, 0.0]);
+			mat4.rotate(mvMatrix, mvMatrix, degreesToRadians(vertAngle), [1.0, 0.0, 0.0]);
+			mat4.rotate(mvMatrix, mvMatrix, degreesToRadians(horizAngle), [0.0, 1.0, 0.0]);
 			mat4.translate(mvMatrix, mvMatrix, [xPos, yPos, zPos]);
 
 			// Set model-view (asteroid matrix):
@@ -198,10 +213,29 @@
 			asteroid.draw(gl, shaderProgram, asteroidTexture);
 		}
 
+		// Draw bullets
+		for (var i = 0; i < (laser.bullets).length; i++) {
+			var bullet = laser.bullets[i];
+			gl.uniform1i(shaderProgram.renderType, 1);
+			// Set camera matrix
+			mat4.identity(mvMatrix);
+			mat4.rotate(mvMatrix, mvMatrix, degreesToRadians(vertAngle), [1.0, 0.0, 0.0]);
+			mat4.rotate(mvMatrix, mvMatrix, degreesToRadians(horizAngle), [0.0, 1.0, 0.0]);
+			mat4.translate(mvMatrix, mvMatrix, [xPos, yPos, zPos]);
+			mat4.multiply(mvMatrix, mvMatrix, bullet[0]); // multiply by object matrix
+			setMatrixUniforms();
+			laser.draw(gl, shaderProgram);
+		}
+
+		// Animation
 		var currentTime = (new Date).getTime();
 		if (currentTime - lastTime >= 10) {
 			var change = currentTime - lastTime;
 			squareRotation += (0.001 * change) / 1000.0;
+			for (var i = 0; i < laser.bullets.length; i++) {
+				//(laser.bullets[i])[1] += -0.5;
+			}
+			//laser.removeBullets();
 		}
 		lastTime = currentTime;
     }
@@ -215,35 +249,43 @@
 	}
 	
 	function handleKeyInput() {
-		var vertRad = degreesToRadians(vertAngle);
-		var horizRad = degreesToRadians(horizAngle);
+		var vertRad = degreesToRadians(-vertAngle);
+		var horizRad = degreesToRadians(-horizAngle);
 		// UP
 		if (pressedKeys[38]) {
-			vertAngle += -0.04;
+			if (-vertAngle < 90.0)
+				vertAngle += -1.0;
 		}
 		// DOWN
 		if (pressedKeys[40]) {
-			vertAngle += 0.04;
+			if (vertAngle < 90.0)
+				vertAngle += 1.0;
 		}
 		// LEFT
 		if (pressedKeys[37]) {
-			horizAngle += -0.04;
+			horizAngle += -1.0;
 		}
 		// RIGHT
 		if (pressedKeys[39]) {
-			horizAngle += 0.04;
+			horizAngle += 1.0;
 		}
 		// move forward (z)
 		if (pressedKeys[90]) {
-			xPos += Math.sin(horizRad) * 0.9;
-			yPos += Math.sin(vertRad) * 0.9;
-			zPos += Math.cos(horizRad) * 0.9;
+			xPos += Math.sin(horizRad) * 1.9;
+			yPos += Math.sin(vertRad) * -1.9;
+			if (vertAngle > -90.0 && vertAngle < 90.0)
+				zPos += Math.cos(horizRad) * 1.9;
 		}
 		// move backward (x)
 		if (pressedKeys[88]) {
-			xPos += Math.sin(horizRad) * -0.9;
-			yPos += Math.sin(vertRad) * -0.9;
-			zPos += Math.cos(horizRad) * -0.9;
+			xPos += Math.sin(horizRad) * -1.9;
+			yPos += Math.sin(vertRad) * 1.9;
+			if (vertAngle > -90.0 && vertAngle < 90.0)
+				zPos += Math.cos(horizRad) * -1.9;
+		}
+		// shoot (spacebar)
+		if (pressedKeys[32]) {
+			laser.shoot(-vertRad, -horizRad, xPos, yPos, -zPos);
 		}
 	}
 
@@ -280,6 +322,7 @@
 		Move forward: z </br>
 		Move backward: x </br>
 		up/down/left/right: arrow keys</br>
+		shoot: spacebar</br>
 	</div>
 </body>	
 

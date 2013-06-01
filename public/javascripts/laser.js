@@ -1,0 +1,99 @@
+/*
+	Laser implementation
+	Sphere implementation adapted from learningwebgl.com
+*/
+
+var latitudeBands = 5;
+var longitudeBands = 5;
+var radius = 1;
+
+function Laser() {
+	this.vertices = [];
+	this.indices = [];
+	this.vertexBuffer;
+	this.indexBuffer;
+	this.bullets = [];
+	this.lastFireTime = 0;
+	// Generate vertices, normals and texture coords:
+	for (var latNum = 0; latNum <= latitudeBands; latNum++) {
+		var theta = latNum * Math.PI / latitudeBands;
+		var sinTheta = Math.sin(theta);
+		var cosTheta = Math.cos(theta);
+		
+		for (var longNum = 0; longNum <= longitudeBands; longNum++) {
+			var phi = longNum * 2 * Math.PI / longitudeBands;
+			var sinPhi = Math.sin(phi);
+			var cosPhi = Math.cos(phi);
+			var x = cosPhi * sinTheta;
+			var y = cosTheta;
+			var z = sinPhi * sinTheta;
+			this.vertices.push(radius * x);
+			this.vertices.push(radius * y);
+			this.vertices.push(radius * z);
+		}
+	}
+	
+	for (var latNum = 0; latNum < latitudeBands; latNum++) {
+		for (var longNum = 0; longNum < longitudeBands; longNum++) {
+			var first = (latNum * (longitudeBands + 1)) + longNum;
+			var second = first + longitudeBands + 1;
+			this.indices.push(first);	
+			this.indices.push(second);
+			this.indices.push(first + 1);
+			this.indices.push(second);
+			this.indices.push(second + 1);
+			this.indices.push(first + 1);
+		}
+	}
+}
+
+Laser.prototype.initBuffers = function(gl, shaderProgram) {
+	this.vertexBuffer = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertices), gl.STATIC_DRAW);
+
+	this.indexBuffer = gl.createBuffer();	
+	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
+	gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.indices), gl.STREAM_DRAW);
+}
+
+Laser.prototype.draw = function(gl, shaderProgram) {
+	gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
+	gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
+	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
+	gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0);
+}
+
+Laser.prototype.shoot = function(vertRad, horizRad, cameraX, cameraY, cameraZ) {
+	// limit fire rate
+	var currentTime = (new Date).getTime();
+	if (currentTime - this.lastFireTime >= 500) {
+		// initialize new bullet and add to array
+		var x = Math.sin(-horizRad) * 0.2;
+		var y = Math.sin(-vertRad) * -0.2;
+		var z = 0.0;
+		if (vertAngle > (-Math.PI/2) && vertAngle < (Math.PI/2))
+			z = Math.cos(-horizRad) * 0.2;
+	
+		var translationVec = vec3.fromValues(x, y, z);
+		var bulletMatrix = mat4.create();
+		mat4.identity(bulletMatrix);
+		mat4.scale(bulletMatrix, bulletMatrix, [5.0, 5.0, 5.0]);
+		console.log([cameraX, cameraY, cameraZ]);
+		//mat4.translate(bulletMatrix, bulletMatrix, [cameraX, cameraY, cameraZ]);
+		//mat4.translate(bulletMatrix, bulletMatrix, translationVec);
+		this.bullets.push([bulletMatrix, vertRad, horizRad]);
+		console.log(bulletMatrix);
+		this.lastFireTime = currentTime;
+	}
+}
+
+Laser.prototype.removeBullets = function() {
+	for (var i = 0; i < this.bullets.length; i++) {
+		if ((this.bullets[i])[0] - (this.bullets[i])[1] >= 80.0) {
+			this.bullets.splice(i, 1);
+		}
+	}
+}
+
+// handle collision in asteroids.js
