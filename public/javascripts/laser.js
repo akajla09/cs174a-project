@@ -67,30 +67,20 @@ Laser.prototype.draw = function(gl, shaderProgram) {
 Laser.prototype.shoot = function(vertRad, horizRad, cameraX, cameraY, cameraZ) {
 	// limit fire rate
 	var currentTime = (new Date).getTime();
-	if (currentTime - this.lastFireTime >= 500) {
+	if (currentTime - this.lastFireTime >= 200) {
 		// initialize new bullet and add to array
-		var x = Math.sin(-horizRad) * 0.2;
-		var y = Math.sin(-vertRad) * -0.2;
-		var z = 0.0;
-		if (vertAngle > (-Math.PI/2) && vertAngle < (Math.PI/2))
-			z = Math.cos(-horizRad) * 0.2;
-	
-		var translationVec = vec3.fromValues(x, y, z);
 		var bulletMatrix = mat4.create();
 		mat4.identity(bulletMatrix);
-		mat4.scale(bulletMatrix, bulletMatrix, [5.0, 5.0, 5.0]);
-		console.log([cameraX, cameraY, cameraZ]);
-		//mat4.translate(bulletMatrix, bulletMatrix, [cameraX, cameraY, cameraZ]);
-		//mat4.translate(bulletMatrix, bulletMatrix, translationVec);
-		this.bullets.push([bulletMatrix, vertRad, horizRad]);
-		console.log(bulletMatrix);
+		mat4.translate(bulletMatrix, bulletMatrix, [-cameraX, -cameraY, -cameraZ]);
+		//mat4.scale(bulletMatrix, bulletMatrix, [5.0, 5.0, 5.0]);
+		this.bullets.push([bulletMatrix, vertRad, horizRad, 0]);
 		this.lastFireTime = currentTime;
 	}
 }
 
 Laser.prototype.removeBullets = function() {
 	for (var i = 0; i < this.bullets.length; i++) {
-		if ((this.bullets[i])[0] - (this.bullets[i])[1] >= 80.0) {
+		if (this.bullets[i][3] >= 15) {
 			this.bullets.splice(i, 1);
 		}
 	}
