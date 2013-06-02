@@ -151,6 +151,9 @@
 		return degrees * (Math.PI / 180.0);
 	}	
 
+	function updateScore(score) {
+		document.getElementById('score-div').innerHTML = 'SCORE: ' + score;
+	}
 /*
 	Texture handling
 	adapted from learningwebgl.com
@@ -252,6 +255,7 @@
 			var bulletPos = [bulletTrans[12], bulletTrans[13], bulletTrans[14]];
 			score += asteroid.checkCollisions(bulletPos, asteroidArray);
 		}
+		updateScore(score);
 
 		// Draw other players
 		gl.uniform1i(shaderProgram.renderType, 3);
@@ -384,7 +388,7 @@
 	}
 
 	function webGLStart() {
-		var canvas = document.getElementById("lesson01-canvas");
+		var canvas = document.getElementById("game-canvas");
 		initGL(canvas);
 		initShaders();
 		initBuffers();
@@ -403,13 +407,19 @@
 
 </head>
 
-<body onload="webGLStart();">
-	<canvas id="lesson01-canvas" style="border: none;" width="1000" height="600"></canvas>
-	<div id="instructions">
-		Move forward: z </br>
-		Move backward: x </br>
-		up/down/left/right: arrow keys</br>
-		shoot: spacebar</br>
+<body onload="webGLStart();" style="background-color: #181818;">
+	<div id="main-div" align="center">
+		<canvas id="game-canvas" style="border: none;" width="1000" height="600" align="center"></canvas>
+		<div id="score-div" style="color: red; font-size: 30px; font-family: impact;">
+			SCORE: --
+		</div>
+		<div id="instructions-div" style="color: white;"></br>
+				<b><i>Instructions: </i></b></br>
+				Move forward: z </br>
+				Move backward: x </br>
+				Change heading: arrow keys</br>
+				Shoot: space</br>
+		</div>
 	</div>
 </body>	
 
