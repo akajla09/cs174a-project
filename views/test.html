@@ -56,93 +56,93 @@
 /*
 	WEBGL Initialization & Utility functions
 */
-    var gl;
-    function initGL(canvas) {
-        try {
-            gl = canvas.getContext("experimental-webgl");
-            gl.viewportWidth = canvas.width;
-            gl.viewportHeight = canvas.height;
-        } catch (e) {
-        }
-        if (!gl) {
-            alert("Could not initialise WebGL, sorry :-(");
-        }
+  var gl;
+  function initGL(canvas) {
+      try {
+          gl = canvas.getContext("experimental-webgl");
+          gl.viewportWidth = canvas.width;
+          gl.viewportHeight = canvas.height;
+      } catch (e) {
+      }
+      if (!gl) {
+          alert("Could not initialise WebGL, sorry :-(");
+      }
+  }
+
+
+  function getShader(gl, id) {
+    var shaderScript = document.getElementById(id);
+    if (!shaderScript) {
+        return null;
     }
 
-
-    function getShader(gl, id) {
-        var shaderScript = document.getElementById(id);
-        if (!shaderScript) {
-            return null;
+    var str = "";
+    var k = shaderScript.firstChild;
+    while (k) {
+        if (k.nodeType == 3) {
+            str += k.textContent;
         }
-
-        var str = "";
-        var k = shaderScript.firstChild;
-        while (k) {
-            if (k.nodeType == 3) {
-                str += k.textContent;
-            }
-            k = k.nextSibling;
-        }
-
-        var shader;
-        if (shaderScript.type == "x-shader/x-fragment") {
-            shader = gl.createShader(gl.FRAGMENT_SHADER);
-        } else if (shaderScript.type == "x-shader/x-vertex") {
-            shader = gl.createShader(gl.VERTEX_SHADER);
-        } else {
-            return null;
-        }
-
-        gl.shaderSource(shader, str);
-        gl.compileShader(shader);
-
-        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-            alert(gl.getShaderInfoLog(shader));
-            return null;
-        }
-
-        return shader;
+        k = k.nextSibling;
     }
 
-
-    var shaderProgram;
-
-    function initShaders() {
-        var fragmentShader = getShader(gl, "shader-fs");
-        var vertexShader = getShader(gl, "shader-vs");
-
-        shaderProgram = gl.createProgram();
-        gl.attachShader(shaderProgram, vertexShader);
-        gl.attachShader(shaderProgram, fragmentShader);
-        gl.linkProgram(shaderProgram);
-
-        if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
-            alert("Could not initialize shaders");
-        }
-
-        gl.useProgram(shaderProgram);
-
-        shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
-        gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
-
-		shaderProgram.textureCoordAttribute = gl.getAttribLocation(shaderProgram, "aTextureCoord");
-		gl.enableVertexAttribArray(shaderProgram.textureCoordAttribute);
-
-        shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
-        shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
-		shaderProgram.samplerUniform = gl.getUniformLocation(shaderProgram, "uSampler");
-		shaderProgram.renderType = gl.getUniformLocation(shaderProgram, "renderType");
+    var shader;
+    if (shaderScript.type == "x-shader/x-fragment") {
+        shader = gl.createShader(gl.FRAGMENT_SHADER);
+    } else if (shaderScript.type == "x-shader/x-vertex") {
+        shader = gl.createShader(gl.VERTEX_SHADER);
+    } else {
+        return null;
     }
 
+    gl.shaderSource(shader, str);
+    gl.compileShader(shader);
 
-    var mvMatrix = mat4.create();
-    var pMatrix = mat4.create();
-
-    function setMatrixUniforms() {
-        gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
-        gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+        alert(gl.getShaderInfoLog(shader));
+        return null;
     }
+
+    return shader;
+  }
+
+
+  var shaderProgram;
+
+  function initShaders() {
+    var fragmentShader = getShader(gl, "shader-fs");
+    var vertexShader = getShader(gl, "shader-vs");
+
+    shaderProgram = gl.createProgram();
+    gl.attachShader(shaderProgram, vertexShader);
+    gl.attachShader(shaderProgram, fragmentShader);
+    gl.linkProgram(shaderProgram);
+
+    if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+        alert("Could not initialize shaders");
+    }
+
+    gl.useProgram(shaderProgram);
+
+    shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
+    gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
+
+    shaderProgram.textureCoordAttribute = gl.getAttribLocation(shaderProgram, "aTextureCoord");
+    gl.enableVertexAttribArray(shaderProgram.textureCoordAttribute);
+
+    shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
+    shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
+    shaderProgram.samplerUniform = gl.getUniformLocation(shaderProgram, "uSampler");
+    shaderProgram.renderType = gl.getUniformLocation(shaderProgram, "renderType");
+  }
+
+
+  var mvMatrix = mat4.create();
+  var pMatrix = mat4.create();
+
+  function setMatrixUniforms() {
+    gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
+    gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
+  }
 
 	function degreesToRadians(degrees) {
 		return degrees * (Math.PI / 180.0);
@@ -175,43 +175,43 @@
 /*
 	Init & Draw Scene
 */
-
+  var players;
 	var asteroid;
 	var laser;
 	var crosshair;
-  	var id = 0;
+  var id = 0;
 	var squareRotation = 0.0;
 	var lastTime;
 	var pressedKeys = [];
-	var xPos = 0.0;
-	var yPos = 0.0;
-	var zPos = 0.0;
 	var xCrosshair = 0.0;
 	var yCrosshair = 0.0;
 	var zCrosshair = -1.2;
+	var xPos = Math.random() * 100;
+	var yPos = Math.random() * 100;
+	var zPos = Math.random() * 100;
 	var vertAngle = 0.0;
 	var horizAngle = 0.0;
 	var asteroidArray = [];
 	var zbulletPos = 160.0;
-  	var socket = io.connect('http://localhost');
+  var socket = io.connect('http://localhost');
 
-    // update other players on your position 10x a second
-    setInterval(function() {
-      socket.emit('update', {position: [xPos, yPos, zPos], id: id});
-    }, 1000 / 10);
+  // update other players on your position 10x a second
+  setInterval(function() {
+    socket.emit('update', {position: [xPos, yPos, zPos], id: id});
+  }, 1000 / 10);
 
-    socket.on('init', function (data) {
-      id = data.id;
-      asteroidArray = asteroid.parseAsteroidField(data.asteroids);
-    });
+  socket.on('init', function (data) {
+    id = data.id;
+    asteroidArray = asteroid.parseAsteroidField(data.asteroids);
+  });
 
-    socket.on('update', function(data) { 
-      if(data.id !== id) {
-      // update ship coordinates here
-      }
-    });
+  socket.on('update', function(data) { 
+    if(data.id !== id) {
+    // update ship coordinates here
+    }
+  });
 
-    function initBuffers() {
+  function initBuffers() {
 		asteroid = new Asteroid(0, 5, 6, 2);
 		laser = new Laser();
 		crosshair = new Crosshair();
@@ -219,12 +219,12 @@
 		asteroid.initBuffers(gl, shaderProgram);
 		laser.initBuffers(gl, shaderProgram);
 		crosshair.initBuffers(gl, shaderProgram);
-    }
+  }
 
 
-    function drawScene() {
-        gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+  function drawScene() {
+    gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
 		mat4.perspective(pMatrix, 45, gl.viewportWidth / gl.viewportHeight, 0.1, 2000.0);
 
@@ -291,7 +291,7 @@
 			laser.removeBullets();
 		}
 		lastTime = currentTime;
-    }
+  }
 
 	function handleKeyDown(event) {
 		pressedKeys[event.keyCode] = true;
@@ -348,22 +348,21 @@
 		drawScene();
 	}
 
+  function webGLStart() {
+    var canvas = document.getElementById("lesson01-canvas");
+    initGL(canvas);
+    initShaders();
+    initBuffers();
+	  initTexture();
 
-    function webGLStart() {
-        var canvas = document.getElementById("lesson01-canvas");
-        initGL(canvas);
-        initShaders();
-        initBuffers();
-		initTexture();
+    gl.clearColor(0.0, 0.0, 0.0, 1.0); // black background
+    gl.enable(gl.DEPTH_TEST);
 
-        gl.clearColor(0.0, 0.0, 0.0, 1.0); // black background
-        gl.enable(gl.DEPTH_TEST);
+	  document.onkeydown = handleKeyDown;
+	  document.onkeyup = handleKeyUp;
 
-		document.onkeydown = handleKeyDown;
-		document.onkeyup = handleKeyUp;
-
-        tick();
-    }
+    tick();
+  }
 
 </script>
 
