@@ -292,19 +292,10 @@
 			laser.draw(gl, shaderProgram);
 		}
 
-		// Draw crosshair
+		// Draw crosshair (static on screen)
 		gl.uniform1i(shaderProgram.renderType, 2);
-		var crosshairMatrix = mat4.create();
-		mat4.identity(crosshairMatrix);
-		mat4.rotate(crosshairMatrix, crosshairMatrix, degreesToRadians(vertAngle), [1.0, 0.0, 0.0]);
-		mat4.rotate(crosshairMatrix, crosshairMatrix, degreesToRadians(horizAngle), [0.0, 1.0, 0.0]);
-		mat4.translate(crosshairMatrix, crosshairMatrix, [0.0, 0.0, zPos - 1.2]);
-		
 		mat4.identity(mvMatrix);
-		mat4.rotate(mvMatrix, mvMatrix, degreesToRadians(vertAngle), [1.0, 0.0, 0.0]);
-		mat4.rotate(mvMatrix, mvMatrix, degreesToRadians(horizAngle), [0.0, 1.0, 0.0]);
-		mat4.translate(mvMatrix, mvMatrix, [xPos, yPos, zPos]);
-		mat4.multiply(mvMatrix, mvMatrix, crosshairMatrix);
+		mat4.identity(pMatrix);
 		setMatrixUniforms();
 		crosshair.draw(gl, shaderProgram);
 
