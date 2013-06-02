@@ -4,6 +4,7 @@
 <title>Asteroids with Friends</title>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 
+<script type="text/javascript" src="/socket.io/socket.io.js"></script>
 <script type="text/javascript" src="/javascripts/gl-matrix.min.js"></script>
 <script type="text/javascript" src="/javascripts/google-webgl-utils.js"></script>
 <script type="text/javascript" src="/javascripts/asteroids.js"></script>
@@ -183,10 +184,15 @@
 	var asteroidArray = [];
 	var zbulletPos = 160.0;
 
+    var socket = io.connect('http://localhost');
+    socket.on('field', function (data) {
+      console.log(data);
+      asteroidArray = asteroid.parseAsteroidField(data);
+    });
+
     function initBuffers() {
 		asteroid = new Asteroid(0, 5, 6, 2);
 		laser = new Laser();
-		asteroidArray = asteroid.createAsteroidField(150);
 		asteroid.initBuffers(gl, shaderProgram);
 		laser.initBuffers(gl, shaderProgram);
     }
