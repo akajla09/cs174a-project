@@ -111,7 +111,7 @@ Ship.prototype.initBuffers = function(gl, shaderProgram) {
 	this.colorBuffer.numItems = 30;
 }
 
-Ship.prototype.draw = function(gl, shaderProgram, frag) {
+Ship.prototype.draw = function(gl, shaderProgram) {
 	gl.bindBuffer(gl.ARRAY_BUFFER, this.posBuffer);
 	gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, this.posBuffer.itemSize, gl.FLOAT, false, 0, 0);
 

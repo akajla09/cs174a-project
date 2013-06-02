@@ -259,7 +259,7 @@
 			mat4.translate(playerMatrix, playerMatrix, otherPlayers[i]);
 			mat4.multiply(mvMatrix, mvMatrix, playerMatrix);
 			setMatrixUniforms();
-			ship.draw(gl, shaderProgram, asteroidTexture);
+			ship.draw(gl, shaderProgram);
 		}
 
 		// Draw Asteroid Field
