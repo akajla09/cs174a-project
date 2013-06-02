@@ -9,16 +9,17 @@
 <script type="text/javascript" src="/javascripts/google-webgl-utils.js"></script>
 <script type="text/javascript" src="/javascripts/asteroids.js"></script>
 <script type="text/javascript" src="/javascripts/laser.js"></script>
+<script type="text/javascript" src="/javascripts/ship.js"></script>
 
 <script id="shader-fs" type="x-shader/x-fragment">
-    precision mediump float;
+	precision mediump float;
 
 	varying vec2 vTextureCoord;
 
 	uniform sampler2D uSampler;
 	uniform int renderType;
 
-    void main(void) {
+	void main(void) {
 		if (renderType == 0) {
 			gl_FragColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
 		}
@@ -30,119 +31,121 @@
 		else if (renderType == 2) {
 			gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
 		}
-    }
+		else if (renderType == 3) {
+			gl_FragColor = vec4(0.5, 0.5, 0.5, 1.0);
+		}
+	}
 </script>
 
 <script id="shader-vs" type="x-shader/x-vertex">
-    attribute vec3 aVertexPosition;
+	attribute vec3 aVertexPosition;
 	attribute vec2 aTextureCoord;
 
-    uniform mat4 uMVMatrix;
-    uniform mat4 uPMatrix;
+	uniform mat4 uMVMatrix;
+	uniform mat4 uPMatrix;
 	uniform int renderType;
 
 	varying vec2 vTextureCoord;
 
-    void main(void) {
-	    gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+	void main(void) {
+		gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
 		if (renderType == 0) {
 			vTextureCoord = aTextureCoord;
 		}
-    }
+	}
 </script>
-
 
 <script type="text/javascript">
 /*
 	WEBGL Initialization & Utility functions
 */
-    var gl;
-    function initGL(canvas) {
-        try {
-            gl = canvas.getContext("experimental-webgl");
-            gl.viewportWidth = canvas.width;
-            gl.viewportHeight = canvas.height;
-        } catch (e) {
-        }
-        if (!gl) {
-            alert("Could not initialise WebGL, sorry :-(");
-        }
-    }
+	var gl;
+	function initGL(canvas) {
+		try {
+			gl = canvas.getContext("experimental-webgl");
+			gl.viewportWidth = canvas.width;
+			gl.viewportHeight = canvas.height;
+		} catch (e) {
+		}
+		if (!gl) {
+			alert("Could not initialise WebGL, sorry :-(");
+		}
+	}
 
 
-    function getShader(gl, id) {
-        var shaderScript = document.getElementById(id);
-        if (!shaderScript) {
-            return null;
-        }
+	function getShader(gl, id) {
+		var shaderScript = document.getElementById(id);
+		if (!shaderScript) {
+			return null;
+		}
 
-        var str = "";
-        var k = shaderScript.firstChild;
-        while (k) {
-            if (k.nodeType == 3) {
-                str += k.textContent;
-            }
-            k = k.nextSibling;
-        }
+		var str = "";
+		var k = shaderScript.firstChild;
+		while (k) {
+			if (k.nodeType == 3) {
+				str += k.textContent;
+			}
+			k = k.nextSibling;
+		}
 
-        var shader;
-        if (shaderScript.type == "x-shader/x-fragment") {
-            shader = gl.createShader(gl.FRAGMENT_SHADER);
-        } else if (shaderScript.type == "x-shader/x-vertex") {
-            shader = gl.createShader(gl.VERTEX_SHADER);
-        } else {
-            return null;
-        }
+		var shader;
+		if (shaderScript.type == "x-shader/x-fragment") {
+			shader = gl.createShader(gl.FRAGMENT_SHADER);
+		} else if (shaderScript.type == "x-shader/x-vertex") {
+			shader = gl.createShader(gl.VERTEX_SHADER);
+		} else {
+			return null;
+		}
 
-        gl.shaderSource(shader, str);
-        gl.compileShader(shader);
+		gl.shaderSource(shader, str);
+		gl.compileShader(shader);
 
-        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-            alert(gl.getShaderInfoLog(shader));
-            return null;
-        }
+		if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+			alert(gl.getShaderInfoLog(shader));
+			return null;
+		}
 
-        return shader;
-    }
+		return shader;
+	}
 
 
-    var shaderProgram;
+	var shaderProgram;
 
-    function initShaders() {
-        var fragmentShader = getShader(gl, "shader-fs");
-        var vertexShader = getShader(gl, "shader-vs");
+	function initShaders() {
+		var fragmentShader = getShader(gl, "shader-fs");
+		var vertexShader = getShader(gl, "shader-vs");
 
-        shaderProgram = gl.createProgram();
-        gl.attachShader(shaderProgram, vertexShader);
-        gl.attachShader(shaderProgram, fragmentShader);
-        gl.linkProgram(shaderProgram);
+		shaderProgram = gl.createProgram();
+		gl.attachShader(shaderProgram, vertexShader);
+		gl.attachShader(shaderProgram, fragmentShader);
+		gl.linkProgram(shaderProgram);
 
-        if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
-            alert("Could not initialize shaders");
-        }
+		if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+				alert("Could not initialize shaders");
+		}
 
-        gl.useProgram(shaderProgram);
+		gl.useProgram(shaderProgram);
 
-        shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
-        gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
+		shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
+		gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
 
 		shaderProgram.textureCoordAttribute = gl.getAttribLocation(shaderProgram, "aTextureCoord");
 		gl.enableVertexAttribArray(shaderProgram.textureCoordAttribute);
 
-        shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
-        shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
+		shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
+		shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
 		shaderProgram.samplerUniform = gl.getUniformLocation(shaderProgram, "uSampler");
 		shaderProgram.renderType = gl.getUniformLocation(shaderProgram, "renderType");
-    }
+	}
 
 
-    var mvMatrix = mat4.create();
-    var pMatrix = mat4.create();
+	var mvMatrix = mat4.create();
+	var pMatrix = mat4.create();
 
-    function setMatrixUniforms() {
-        gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
-        gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
-    }
+	function setMatrixUniforms() {
+		gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
+		gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
+	}
 
 	function degreesToRadians(degrees) {
 		return degrees * (Math.PI / 180.0);
@@ -177,54 +180,60 @@
 */
 
 	var score = 0;
+	var otherPlayers = [];
+	var enemyArray = [];
 	var asteroid;
 	var laser;
 	var crosshair;
-  	var id = 0;
+	var id = 0;
 	var squareRotation = 0.0;
+	var rPyramid = 0;
 	var lastTime;
 	var pressedKeys = [];
-	var xPos = 0.0;
-	var yPos = 0.0;
-	var zPos = -150.0;
 	var xCrosshair = 0.0;
 	var yCrosshair = 0.0;
 	var zCrosshair = -1.2;
+	var xPos = Math.random() * 100;
+	var yPos = Math.random() * 100;
+	var zPos = Math.random() * 100;
 	var vertAngle = 0.0;
 	var horizAngle = 0.0;
 	var asteroidArray = [];
 	var zbulletPos = 160.0;
-  	var socket = io.connect('http://localhost');
+	var socket = io.connect('http://localhost');
 
-    // update other players on your position 10x a second
-    setInterval(function() {
-      socket.emit('update', {position: [xPos, yPos, zPos], id: id});
-    }, 1000 / 10);
+	// update other players on your position 10x a second
+	setInterval(function() {
+		socket.emit('update', {position: [xPos, yPos, zPos], id: id});
+	}, 1000 / 10);
 
-    socket.on('init', function (data) {
-      id = data.id;
-      asteroidArray = asteroid.parseAsteroidField(data.asteroids);
-    });
+	socket.on('init', function (data) {
+		id = data.id;
+		asteroidArray = asteroid.parseAsteroidField(data.asteroids);
+	});
 
-    socket.on('update', function(data) { 
-      if(data.id !== id) {
-      // update ship coordinates here
-      }
-    });
+	socket.on('update', function(data) { 
+		if(data.id !== id) {
+		// update ship coordinates here
+		}
+	});
 
-    function initBuffers() {
+	function initBuffers() {
 		asteroid = new Asteroid(0, 5, 6, 2);
 		laser = new Laser();
 		crosshair = new Crosshair();
+		ship = new Ship();
 		asteroid.initBuffers(gl, shaderProgram);
 		laser.initBuffers(gl, shaderProgram);
 		crosshair.initBuffers(gl, shaderProgram);
-    }
+		ship.initBuffers(gl, shaderProgram);
+		for (var i = 0; i < 50; i++) // temporary players
+			otherPlayers.push([Math.random() * 500, Math.random() * 500, Math.random() * 500]);
+	}
 
-
-    function drawScene() {
-        gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+	function drawScene() {
+		gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
 		mat4.perspective(pMatrix, 45, gl.viewportWidth / gl.viewportHeight, 0.1, 2000.0);
 
@@ -233,6 +242,24 @@
 			var bulletTrans = laser.bullets[i][0];
 			var bulletPos = [bulletTrans[12], bulletTrans[13], bulletTrans[14]];
 			score += asteroid.checkCollisions(bulletPos, asteroidArray);
+		}
+
+		// Draw other players
+		gl.uniform1i(shaderProgram.renderType, 3);
+		for (var i = 0; i < otherPlayers.length; i++) {
+			// Set camera:
+			mat4.identity(mvMatrix);
+			mat4.rotate(mvMatrix, mvMatrix, degreesToRadians(vertAngle), [1.0, 0.0, 0.0]);
+			mat4.rotate(mvMatrix, mvMatrix, degreesToRadians(horizAngle), [0.0, 1.0, 0.0]);
+			mat4.rotate(mvMatrix, mvMatrix, degreesToRadians(rPyramid), [0, 1, 0]);
+			mat4.translate(mvMatrix, mvMatrix, [xPos, yPos, zPos]);
+			
+			var playerMatrix = mat4.create();
+			mat4.identity(playerMatrix);
+			mat4.translate(playerMatrix, playerMatrix, otherPlayers[i]);
+			mat4.multiply(mvMatrix, mvMatrix, playerMatrix);
+			setMatrixUniforms();
+			ship.draw(gl, shaderProgram);
 		}
 
 		// Draw Asteroid Field
@@ -285,6 +312,8 @@
 		var currentTime = (new Date).getTime();
 		if (currentTime - lastTime >= 10) {
 			var change = currentTime - lastTime;
+			rPyramid += (50 * change)/1000; // ship rotation
+			if (rPyramid > 90) rPyramid -= 90;
 			squareRotation += (0.001 * change) / 1000.0;
 			for (var i = 0; i < laser.bullets.length; i++) {
 				var bullet = laser.bullets[i];
@@ -297,7 +326,7 @@
 			laser.removeBullets();
 		}
 		lastTime = currentTime;
-    }
+	}
 
 	function handleKeyDown(event) {
 		pressedKeys[event.keyCode] = true;
@@ -354,22 +383,21 @@
 		drawScene();
 	}
 
-
-    function webGLStart() {
-        var canvas = document.getElementById("lesson01-canvas");
-        initGL(canvas);
-        initShaders();
-        initBuffers();
+	function webGLStart() {
+		var canvas = document.getElementById("lesson01-canvas");
+		initGL(canvas);
+		initShaders();
+		initBuffers();
 		initTexture();
 
-        gl.clearColor(0.0, 0.0, 0.0, 1.0); // black background
-        gl.enable(gl.DEPTH_TEST);
+		gl.clearColor(0.0, 0.0, 0.0, 1.0); // black background
+		gl.enable(gl.DEPTH_TEST);
 
 		document.onkeydown = handleKeyDown;
 		document.onkeyup = handleKeyUp;
 
-        tick();
-    }
+		tick();
+	}
 
 </script>
 
