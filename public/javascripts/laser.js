@@ -87,3 +87,43 @@ Laser.prototype.removeBullets = function() {
 }
 
 // handle collision in asteroids.js
+
+/*
+	Crosshair Implementation
+*/
+
+var crosshairVertices = [
+	// top triangle
+	0.0, 0.015, 0.0,
+	0.02, 0.08, 0.0,
+	-0.02, 0.08, 0.0,
+	// left triangle
+	-0.015, 0.0, 0.0,
+	-0.08, 0.02, 0.0,
+	-0.08, -0.02, 0.0,
+	// bottom triangle
+	0.0, -0.015, 0.0,
+	-0.02, -0.08, 0.0,
+	0.02, -0.08, 0.0,
+	// right triangle
+	0.015, 0.0, 0.0,
+	0.08, 0.02, 0.0,
+	0.08, -0.02, 0.0
+];
+
+function Crosshair() {
+	this.vertexBuffer;
+	this.vertices = crosshairVertices;
+}
+
+Crosshair.prototype.initBuffers = function(gl, shaderProgram) {
+	this.vertexBuffer = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertices), gl.STATIC_DRAW);
+}
+
+Crosshair.prototype.draw = function(gl, shaderProgram) {
+	gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
+	gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
+	gl.drawArrays(gl.TRIANGLES, 0, 12);
+}
