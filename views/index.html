@@ -352,6 +352,12 @@
 
 	function handleKeyDown(event) {
 		pressedKeys[event.keyCode] = true;
+		var inputOK = [ 38, 40, 37, 39, 90, 88, 32];
+		for(var i = 0; i < inputOK.length; i++)
+			if(event.keyCode === inputOK[i]) {
+				return false;
+			}
+		return true;
 	}
 
 	function handleKeyUp(event) {
