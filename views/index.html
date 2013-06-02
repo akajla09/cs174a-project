@@ -15,7 +15,8 @@
 	precision mediump float;
 
 	varying vec2 vTextureCoord;
-
+    varying vec3 vLightWeighting;
+	
 	uniform sampler2D uSampler;
 	uniform int renderType;
 
@@ -31,8 +32,10 @@
 		else if (renderType == 2) {
 			gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
 		}
+		// render player
 		else if (renderType == 3) {
-			gl_FragColor = vec4(0.2, 0.2, 0.2, 1.0);
+			vec4 textureColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
+			gl_FragColor = vec4(textureColor.rgb * vLightWeighting, textureColor.a);
 		}
 	}
 </script>
@@ -46,11 +49,26 @@
 	uniform int renderType;
 
 	varying vec2 vTextureCoord;
-
+    //used for ambient lighting
+	uniform mat3 uNMatrix;
+	uniform vec3 uAmbientColor;
+	uniform vec3 uLightingDirection;
+	uniform vec3 uDirectionalColor;
+	varying vec3 vLightWeighting;
+	attribute vec3 aVertexNormal;
+	
+  uniform bool uUseLighting;
+    
 	void main(void) {
 		gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
 		if (renderType == 0) {
 			vTextureCoord = aTextureCoord;
+		}
+		if (renderType == 3) {
+			vTextureCoord = aTextureCoord;
+			vec3 transformedNormal = uNMatrix * aVertexNormal;
+			float directionalLightWeighting = max(dot(transformedNormal, uLightingDirection), 0.0);
+			vLightWeighting = uAmbientColor + uDirectionalColor * directionalLightWeighting;
 		}
 	}
 </script>
