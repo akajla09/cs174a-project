@@ -106,12 +106,12 @@ Asteroid.prototype.checkCollisions = function(bulletPos, asteroidArray) {
 	for (var i = 0; i < this.collisionArray.length; i++) {
 		var trans = this.collisionArray[i].trans;
 		var scale = this.collisionArray[i].scale;
-		var xmin = trans[0] - scale[0];
-		var xmax = trans[0] + scale[0];
-		var ymin = trans[1] - scale[1];
-		var ymax = trans[1] + scale[1];
-		var zmin = trans[2] - scale[2];
-		var zmax = trans[2] + scale[2];
+		var xmin = trans[0] - 1.5 * scale[0];
+		var xmax = trans[0] + 1.5 * scale[0];
+		var ymin = trans[1] - 1.5 * scale[1];
+		var ymax = trans[1] + 1.5 * scale[1];
+		var zmin = trans[2] - 1.5 * scale[2];
+		var zmax = trans[2] + 1.5 * scale[2];
 		var bulletxmin = bulletPos[0] - 1.0;
 		var bulletxmax = bulletPos[0] + 1.0;
 		var bulletymin = bulletPos[1] - 1.0;
@@ -119,10 +119,14 @@ Asteroid.prototype.checkCollisions = function(bulletPos, asteroidArray) {
 		var bulletzmin = bulletPos[2] - 1.0;
 		var bulletzmax = bulletPos[2] + 1.0;
 
+		if (i == 129)
+			console.log({id: i, asteroidRange : [xmin, xmax, ymin, ymax, zmin, zmax], bulletRange: [bulletxmin, bulletxmax, bulletymin, bulletymax, bulletzmin, bulletzmax]});
+
 		// bullet collided with asteroid
 		if ((bulletxmin >= xmin && bulletxmax <= xmax) && (bulletymin >= ymin && bulletymax <= ymax) 
 			&& (bulletzmin >= zmin && bulletzmax <= zmax))
 		{
+			console.log("HIT!");
 			console.log({id: i, asteroidRange : [xmin, xmax, ymin, ymax, zmin, zmax], bulletRange: [bulletxmin, bulletxmax, bulletymin, bulletymax, bulletzmin, bulletzmax]});
 			// Remove asteroid & bullet
 			score += 10;
