@@ -49,9 +49,10 @@ for(var i = 0; i < NUM_ASTEROIDS; i++) {
   var scalez = 4.5 * Math.random() + 1.5;
 
   // random translation vector:
-  var randx = Math.random() * 70.0 * (Math.random() < 0.5 ? -1 : 1);
-  var randy = Math.random() * 70.0 * (Math.random() < 0.5 ? -1 : 1);
-  var randz = Math.random() * -140.0 - 20.0;
+  var randx = Math.random() * 200.0 * (Math.random() < 0.5 ? -1 : 1);
+  var randy = Math.random() * 200.0 * (Math.random() < 0.5 ? -1 : 1);
+  //var randz = Math.random() * -140.0 - 20.0;
+  var randz = Math.random() * 200.0 * (Math.random() < 0.5 ? -1 : 1);
   asteroids.push({scale: [scalex, scaley, scalez], coord: [randx, randy, randz]});
 }
 

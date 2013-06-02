@@ -12,6 +12,7 @@ function Asteroid(asteroidIndex, latitudeBands, longitudeBands, radius) {
 	this.normalBuffer;
 	this.textureCoordBuffer;
 	this.indexBuffer;
+	this.collisionArray = [];
 	// Generate vertices, normals and texture coords:
 	for (var latNum = 0; latNum <= latitudeBands; latNum++) {
 		var theta = latNum * Math.PI / latitudeBands;
@@ -85,26 +86,6 @@ Asteroid.prototype.draw = function(gl, shaderProgram, texture) {
 	gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0);
 }
 
-// returns array of random transformation matrices that are used to draw multiple asteroids
-Asteroid.prototype.createAsteroidField = function(numAsteroids) {
-	var asteroidArray = [];
-	for (var i = 0; i < numAsteroids; i++) {
-		var asteroidMatrix = mat4.create();
-		mat4.identity(asteroidMatrix);
-		// random scale vector:
-		var randScale = vec3.fromValues((4.5 * Math.random()) + 1.5, (4.5 * Math.random()) + 1.5, (4.5 * Math.random()) + 1.5);
-		// random translation vector:
-		var randx = Math.random() * 70.0 * (Math.random() < 0.5 ? -1 : 1);
-		var randy = Math.random() * 70.0 * (Math.random() < 0.5 ? -1 : 1);
-		var randz = Math.random() * -140.0 - 20.0;
-		var randTrans = vec3.fromValues(randx, randy, randz);
-		mat4.scale(asteroidMatrix, asteroidMatrix, randScale);
-		mat4.translate(asteroidMatrix, asteroidMatrix, randTrans);
-		asteroidArray.push(asteroidMatrix);
-	}
-	return asteroidArray;
-}
-
 Asteroid.prototype.parseAsteroidField = function(data) {
 	var asteroidArray = [];
 	for (var i = 0; i < data.length; i++) {
@@ -112,10 +93,42 @@ Asteroid.prototype.parseAsteroidField = function(data) {
 		mat4.identity(asteroidMatrix);
 		var randScale = vec3.fromValues(data[i].scale[0], data[i].scale[1], data[i].scale[2]);
 		var randTrans = vec3.fromValues(data[i].coord[0], data[i].coord[1], data[i].coord[2]);
-		mat4.scale(asteroidMatrix, asteroidMatrix, randScale);
 		mat4.translate(asteroidMatrix, asteroidMatrix, randTrans);
+		mat4.scale(asteroidMatrix, asteroidMatrix, randScale);
 		asteroidArray.push(asteroidMatrix);
+		this.collisionArray.push({trans: randTrans, scale: randScale});
 	}
 	return asteroidArray;
 }
 
+Asteroid.prototype.checkCollisions = function(bulletPos, asteroidArray) {
+	var score = 0;
+	for (var i = 0; i < this.collisionArray.length; i++) {
+		var trans = this.collisionArray[i].trans;
+		var scale = this.collisionArray[i].scale;
+		var xmin = trans[0] - scale[0];
+		var xmax = trans[0] + scale[0];
+		var ymin = trans[1] - scale[1];
+		var ymax = trans[1] + scale[1];
+		var zmin = trans[2] - scale[2];
+		var zmax = trans[2] + scale[2];
+		var bulletxmin = bulletPos[0] - 1.0;
+		var bulletxmax = bulletPos[0] + 1.0;
+		var bulletymin = bulletPos[1] - 1.0;
+		var bulletymax = bulletPos[1] + 1.0;
+		var bulletzmin = bulletPos[2] - 1.0;
+		var bulletzmax = bulletPos[2] + 1.0;
+
+		// bullet collided with asteroid
+		if ((bulletxmin >= xmin && bulletxmax <= xmax) && (bulletymin >= ymin && bulletymax <= ymax) 
+			&& (bulletzmin >= zmin && bulletzmax <= zmax))
+		{
+			console.log({id: i, asteroidRange : [xmin, xmax, ymin, ymax, zmin, zmax], bulletRange: [bulletxmin, bulletxmax, bulletymin, bulletymax, bulletzmin, bulletzmax]});
+			// Remove asteroid & bullet
+			score += 10;
+			this.collisionArray.splice(i, 1);
+			asteroidArray.splice(i, 1);
+		}
+	}
+	return score;
+}

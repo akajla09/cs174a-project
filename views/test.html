@@ -176,6 +176,7 @@
 	Init & Draw Scene
 */
 
+	var score = 0;
 	var asteroid;
 	var laser;
 	var crosshair;
@@ -185,7 +186,7 @@
 	var pressedKeys = [];
 	var xPos = 0.0;
 	var yPos = 0.0;
-	var zPos = 0.0;
+	var zPos = -150.0;
 	var xCrosshair = 0.0;
 	var yCrosshair = 0.0;
 	var zCrosshair = -1.2;
@@ -215,7 +216,6 @@
 		asteroid = new Asteroid(0, 5, 6, 2);
 		laser = new Laser();
 		crosshair = new Crosshair();
-		asteroidArray = asteroid.createAsteroidField(150);
 		asteroid.initBuffers(gl, shaderProgram);
 		laser.initBuffers(gl, shaderProgram);
 		crosshair.initBuffers(gl, shaderProgram);
@@ -227,6 +227,13 @@
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
 		mat4.perspective(pMatrix, 45, gl.viewportWidth / gl.viewportHeight, 0.1, 2000.0);
+
+		// Check collisions
+		for (var i = 0; i < laser.bullets.length; i++) {
+			var bulletTrans = laser.bullets[i][0];
+			var bulletPos = [bulletTrans[12], bulletTrans[13], bulletTrans[14]];
+			score += asteroid.checkCollisions(bulletPos, asteroidArray);
+		}
 
 		// Draw Asteroid Field
 		gl.uniform1i(shaderProgram.renderType, 0);
@@ -264,8 +271,7 @@
 		mat4.identity(crosshairMatrix);
 		mat4.rotate(crosshairMatrix, crosshairMatrix, degreesToRadians(vertAngle), [1.0, 0.0, 0.0]);
 		mat4.rotate(crosshairMatrix, crosshairMatrix, degreesToRadians(horizAngle), [0.0, 1.0, 0.0]);
-		mat4.translate(crosshairMatrix, crosshairMatrix, [0.0, 0.0, zPos - 1.2]);     
-		//mat4.translate(crosshairMatrix, crosshairMatrix, [0.0, 0.0, -1.2]);
+		mat4.translate(crosshairMatrix, crosshairMatrix, [0.0, 0.0, zPos - 1.2]);
 		
 		mat4.identity(mvMatrix);
 		mat4.rotate(mvMatrix, mvMatrix, degreesToRadians(vertAngle), [1.0, 0.0, 0.0]);

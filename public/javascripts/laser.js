@@ -72,7 +72,6 @@ Laser.prototype.shoot = function(vertRad, horizRad, cameraX, cameraY, cameraZ) {
 		var bulletMatrix = mat4.create();
 		mat4.identity(bulletMatrix);
 		mat4.translate(bulletMatrix, bulletMatrix, [-cameraX, -cameraY, -cameraZ]);
-		//mat4.scale(bulletMatrix, bulletMatrix, [5.0, 5.0, 5.0]);
 		this.bullets.push([bulletMatrix, vertRad, horizRad, 0]);
 		this.lastFireTime = currentTime;
 	}
