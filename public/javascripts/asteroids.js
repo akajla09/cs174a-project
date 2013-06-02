@@ -119,15 +119,10 @@ Asteroid.prototype.checkCollisions = function(bulletPos, asteroidArray) {
 		var bulletzmin = bulletPos[2] - 1.0;
 		var bulletzmax = bulletPos[2] + 1.0;
 
-		if (i == 129)
-			console.log({id: i, asteroidRange : [xmin, xmax, ymin, ymax, zmin, zmax], bulletRange: [bulletxmin, bulletxmax, bulletymin, bulletymax, bulletzmin, bulletzmax]});
-
 		// bullet collided with asteroid
 		if ((bulletxmin >= xmin && bulletxmax <= xmax) && (bulletymin >= ymin && bulletymax <= ymax) 
 			&& (bulletzmin >= zmin && bulletzmax <= zmax))
 		{
-			console.log("HIT!");
-			console.log({id: i, asteroidRange : [xmin, xmax, ymin, ymax, zmin, zmax], bulletRange: [bulletxmin, bulletxmax, bulletymin, bulletymax, bulletzmin, bulletzmax]});
 			// Remove asteroid & bullet
 			score += 10;
 			this.collisionArray.splice(i, 1);
