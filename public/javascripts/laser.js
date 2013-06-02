@@ -1,8 +1,9 @@
 /*
 	Laser implementation
-	Sphere implementation adapted from learningwebgl.com
+	Basic sphere implementation adapted from learningwebgl.com
 */
 
+// Sphere complexity
 var latitudeBands = 5;
 var longitudeBands = 5;
 var radius = 1;
@@ -14,7 +15,8 @@ function Laser() {
 	this.indexBuffer;
 	this.bullets = [];
 	this.lastFireTime = 0;
-	// Generate vertices, normals and texture coords:
+
+	// Generate vertices:
 	for (var latNum = 0; latNum <= latitudeBands; latNum++) {
 		var theta = latNum * Math.PI / latitudeBands;
 		var sinTheta = Math.sin(theta);
@@ -73,19 +75,21 @@ Laser.prototype.shoot = function(vertRad, horizRad, cameraX, cameraY, cameraZ) {
 		mat4.identity(bulletMatrix);
 		mat4.translate(bulletMatrix, bulletMatrix, [-cameraX, -cameraY, -cameraZ]);
 		this.bullets.push([bulletMatrix, vertRad, horizRad, 0]);
+		console.log(bulletMatrix);
 		this.lastFireTime = currentTime;
 	}
 }
 
 Laser.prototype.removeBullets = function() {
 	for (var i = 0; i < this.bullets.length; i++) {
+		// Remove bullet if it has been alive for 15 ticks
 		if (this.bullets[i][3] >= 15) {
 			this.bullets.splice(i, 1);
 		}
 	}
 }
 
-// handle collision in asteroids.js
+
 
 /*
 	Crosshair Implementation
