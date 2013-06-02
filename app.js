@@ -10,6 +10,7 @@ var express = require('express')
   , path = require('path');
 
 var app = express();
+var NUM_ASTEROIDS = 150;
 
 // all environments
 app.set('port', process.env.PORT || 3000);
@@ -38,6 +39,28 @@ server.listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });
 
+var id = 9
+var asteroids = [];
+// generate random asteroid field
+for(var i = 0; i < NUM_ASTEROIDS; i++) {
+  // random scale vector:
+  var scalex = 4.5 * Math.random() + 1.5;
+  var scaley = 4.5 * Math.random() + 1.5;
+  var scalez = 4.5 * Math.random() + 1.5;
+
+  // random translation vector:
+  var randx = Math.random() * 70.0 * (Math.random() < 0.5 ? -1 : 1);
+  var randy = Math.random() * 70.0 * (Math.random() < 0.5 ? -1 : 1);
+  var randz = Math.random() * -140.0 - 20.0;
+  asteroids.push({scale: [scalex, scaley, scalez], coord: [randx, randy, randz]});
+}
+
 io.sockets.on('connection', function(socket) {
-  socket.emit('test', { test: test });
+  socket.emit('init', {asteroids: asteroids, id: id});
+  id++;
+
+  socket.on('update', function(data) {
+    io.sockets.emit('update', data);
+  });
 });
+

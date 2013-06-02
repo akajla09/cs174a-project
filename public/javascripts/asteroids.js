@@ -105,3 +105,17 @@ Asteroid.prototype.createAsteroidField = function(numAsteroids) {
 	return asteroidArray;
 }
 
+Asteroid.prototype.parseAsteroidField = function(data) {
+	var asteroidArray = [];
+	for (var i = 0; i < data.length; i++) {
+		var asteroidMatrix = mat4.create();
+		mat4.identity(asteroidMatrix);
+		var randScale = vec3.fromValues(data[i].scale[0], data[i].scale[1], data[i].scale[2]);
+		var randTrans = vec3.fromValues(data[i].coord[0], data[i].coord[1], data[i].coord[2]);
+		mat4.scale(asteroidMatrix, asteroidMatrix, randScale);
+		mat4.translate(asteroidMatrix, asteroidMatrix, randTrans);
+		asteroidArray.push(asteroidMatrix);
+	}
+	return asteroidArray;
+}
+
