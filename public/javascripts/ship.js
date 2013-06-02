@@ -109,6 +109,52 @@ Ship.prototype.initBuffers = function(gl, shaderProgram) {
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.colors), gl.STATIC_DRAW);
 	this.colorBuffer.itemSize = 4;
 	this.colorBuffer.numItems = 30;
+	
+	//normals for point light source
+	cubeVertexNormalBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexNormalBuffer);
+        var vertexNormals = [
+            // Front face
+             0.0,  0.0,  1.0,
+             0.0,  0.0,  1.0,
+             0.0,  0.0,  1.0,
+             0.0,  0.0,  1.0,
+
+            // Back face
+             0.0,  0.0, -1.0,
+             0.0,  0.0, -1.0,
+             0.0,  0.0, -1.0,
+             0.0,  0.0, -1.0,
+
+            // Top face
+             0.0,  1.0,  0.0,
+             0.0,  1.0,  0.0,
+             0.0,  1.0,  0.0,
+             0.0,  1.0,  0.0,
+
+            // Bottom face
+             0.0, -1.0,  0.0,
+             0.0, -1.0,  0.0,
+             0.0, -1.0,  0.0,
+             0.0, -1.0,  0.0,
+
+            // Right face
+             1.0,  0.0,  0.0,
+             1.0,  0.0,  0.0,
+             1.0,  0.0,  0.0,
+             1.0,  0.0,  0.0,
+
+            // Left face
+            -1.0,  0.0,  0.0,
+            -1.0,  0.0,  0.0,
+            -1.0,  0.0,  0.0,
+            -1.0,  0.0,  0.0
+        ];
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexNormals), gl.STATIC_DRAW);
+        cubeVertexNormalBuffer.itemSize = 3;
+        cubeVertexNormalBuffer.numItems = 24;
+        
+        
 }
 
 Ship.prototype.draw = function(gl, shaderProgram) {
@@ -118,5 +164,37 @@ Ship.prototype.draw = function(gl, shaderProgram) {
 	gl.bindBuffer(gl.ARRAY_BUFFER, this.colorBuffer);
 	gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, this.colorBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
+    //normals for the pyramid
+    gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexNormalBuffer);
+    gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, cubeVertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    
+    //ambient lighting
+    gl.uniform3f(
+	shaderProgram.ambientColorUniform,
+	parseFloat(.2),
+	parseFloat(.2),
+	parseFloat(.2)
+	);
+	
+	var lightingDirection = [
+	parseFloat(-.25),
+	parseFloat(-.25),
+	parseFloat(-1)
+	];
+	var adjustedLD = vec3.create();
+	vec3.normalize(lightingDirection, adjustedLD);
+	vec3.scale(adjustedLD, -1);
+	gl.uniform3fv(shaderProgram.lightingDirectionUniform, adjustedLD);
+	
+	gl.uniform3f(
+	shaderProgram.directionalColorUniform,
+	parseFloat(.8),
+	parseFloat(.8),
+	parseFloat(.8)
+	);
+    
+    
+    
+    
 	gl.drawArrays(gl.TRIANGLES, 0, this.posBuffer.numItems);
 }
