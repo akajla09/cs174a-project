@@ -39,6 +39,7 @@ server.listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });
 
+var id = 9
 var asteroids = [];
 // generate random asteroid field
 for(var i = 0; i < NUM_ASTEROIDS; i++) {
@@ -55,5 +56,11 @@ for(var i = 0; i < NUM_ASTEROIDS; i++) {
 }
 
 io.sockets.on('connection', function(socket) {
-  socket.emit('field', asteroids);
+  socket.emit('init', {asteroids: asteroids, id: id});
+  id++;
+
+  socket.on('update', function(data) {
+    io.sockets.emit('update', data);
+  });
 });
+

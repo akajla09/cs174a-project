@@ -173,6 +173,7 @@
 
 	var asteroid;
 	var laser;
+  var id = 0;
 	var squareRotation = 0.0;
 	var lastTime;
 	var pressedKeys = [];
@@ -183,11 +184,22 @@
 	var horizAngle = 0.0;
 	var asteroidArray = [];
 	var zbulletPos = 160.0;
+  var socket = io.connect('http://localhost');
 
-    var socket = io.connect('http://localhost');
-    socket.on('field', function (data) {
-      console.log(data);
-      asteroidArray = asteroid.parseAsteroidField(data);
+    // update other players on your position 10x a second
+    setInterval(function() {
+      socket.emit('update', {position: [xPos, yPos, zPos], id: id});
+    }, 1000 / 10);
+
+    socket.on('init', function (data) {
+      id = data.id;
+      asteroidArray = asteroid.parseAsteroidField(data.asteroids);
+    });
+
+    socket.on('update', function(data) { 
+      if(data.id !== id) {
+      // update ship coordinates here
+      }
     });
 
     function initBuffers() {
