@@ -72,7 +72,7 @@ Asteroid.prototype.initBuffers = function(gl, shaderProgram) {
 	
 }
 
-Asteroid.prototype.draw = function(gl, shaderProgram, texture, enableLighting) {
+Asteroid.prototype.draw = function(gl, shaderProgram, texture) {
 	// Lighting elements
 	gl.uniform1i(shaderProgram.useLightingUniform, 1);
 	gl.uniform3f(shaderProgram.ambientColorUniform, 0.8, 0.8, 0.8);
