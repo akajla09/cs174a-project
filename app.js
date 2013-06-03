@@ -33,14 +33,14 @@ app.get('/', routes.index);
 app.get('/users', user.list);
 
 var server = http.createServer(app)
-var io = require('socket.io').listen(server);
+var io = require('socket.io').listen(server, { log: false });;
 
 server.listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });
 
 var id = 9
-var asteroids = [];
+var asteroids = {};
 // generate random asteroid field
 for(var i = 0; i < NUM_ASTEROIDS; i++) {
   // random scale vector:
@@ -53,7 +53,7 @@ for(var i = 0; i < NUM_ASTEROIDS; i++) {
   var randy = Math.random() * 200.0 * (Math.random() < 0.5 ? -1 : 1);
   //var randz = Math.random() * -140.0 - 20.0;
   var randz = Math.random() * 200.0 * (Math.random() < 0.5 ? -1 : 1);
-  asteroids.push({scale: [scalex, scaley, scalez], coord: [randx, randy, randz]});
+  asteroids[i] = {scale: [scalex, scaley, scalez], coord: [randx, randy, randz]};
 }
 
 io.sockets.on('connection', function(socket) {
@@ -68,8 +68,8 @@ io.sockets.on('connection', function(socket) {
     io.sockets.emit('shoot', data);
   });
 
-  socket.on('update_asteroids', function(data) {
-    asteroids = data;
+  socket.on('remove', function(data) {
+    if(asteroids[data]) delete asteroids[data];
   });
 });
 

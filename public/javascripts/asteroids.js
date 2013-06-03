@@ -72,7 +72,7 @@ Asteroid.prototype.initBuffers = function(gl, shaderProgram) {
 	
 }
 
-Asteroid.prototype.draw = function(gl, shaderProgram, texture, enableLighting) {
+Asteroid.prototype.draw = function(gl, shaderProgram, texture) {
 	// Lighting elements
 	gl.uniform1i(shaderProgram.useLightingUniform, 1);
 	gl.uniform3f(shaderProgram.ambientColorUniform, 0.8, 0.8, 0.8);
@@ -99,7 +99,7 @@ Asteroid.prototype.draw = function(gl, shaderProgram, texture, enableLighting) {
 
 Asteroid.prototype.parseAsteroidField = function(data) {
 	var asteroidArray = [];
-	for (var i = 0; i < data.length; i++) {
+	for (var i in data) {
 		var asteroidMatrix = mat4.create();
 		mat4.identity(asteroidMatrix);
 		var randScale = vec3.fromValues(data[i].scale[0], data[i].scale[1], data[i].scale[2]);
@@ -107,7 +107,7 @@ Asteroid.prototype.parseAsteroidField = function(data) {
 		mat4.translate(asteroidMatrix, asteroidMatrix, randTrans);
 		mat4.scale(asteroidMatrix, asteroidMatrix, randScale);
 		asteroidArray.push(asteroidMatrix);
-		this.collisionArray.push({trans: randTrans, scale: randScale});
+		this.collisionArray.push({id: i, trans: randTrans, scale: randScale});
 	}
 	return asteroidArray;
 }
@@ -139,7 +139,7 @@ Asteroid.prototype.checkCollisions = function(bulletIndex, bullets, bulletPos, a
 			this.collisionArray.splice(i, 1);
 			asteroidArray.splice(i, 1);
 			bullets.splice(bulletIndex, 1);
-			callback(asteroidArray);
+			callback(this.collisionArray[i].id);
 		}
 	}
 	return score;

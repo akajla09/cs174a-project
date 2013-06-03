@@ -1,0 +1,46 @@
+Project Implementation Details
+
+
+Required Topics:
+The following are the required topics and how we implemented them into our 
+project.
+
+Transformations - The main game world utilizes a variety of transformations 
+and shapes to implement the required objects. A field of random asteroids is 
+created by instancing a low-complexity sphere (sphere implementation adapted 
+from learningwebgl.com) and applying translation and scaling matrices to 
+create a field of multiple asteroids. In addition, bullets from the laser 
+utilize translations for movement animation.
+
+Camera - The game is implemented from a first-person perspective where the 
+user has control over manipulating the camera in order to move the ship around 
+the world. Utilizing a variety of camera transformations (rotations & translations), 
+we were able to implement a camera navigation system controllable via the keyboard.
+
+Lighting - The game utilizes ambient and directional lighting for the asteroid field. 
+A light source placed far away from the asteroids adds the effect of a dim sun in space. 
+The lighting implementation procedure is adapted from learningwebgl.com.
+
+Textures - All asteroids have a common texture (image file) applied to them via the 
+shaders in order to add color details and realism. The texture implementation 
+procedure is adapted from learningwebgl.com.
+
+
+
+Advanced Topics:
+
+Collision Detection - We implemented a collision detection algorithm that 
+utilizes each asteroid's scale and translations to compute an object volume for 
+each asteroid. Then, a method continuously checks all bullet positions in the world 
+against the object volumes to find a collision. If collisions are found, the respective 
+asteroid and bullet are removed from the world and points are awarded to the player.
+
+WebGL - The entire game is implemented using WebGL and is served via a server running Node.js. 
+We utilized two utility libraries: Google-webgl-utils and gl-matrix to help with 
+animation utility functions and with vector and matrix abstractions. We utilized tutorials 
+and examples from learningwebgl.com to help with our implementation.
+
+Multiplayer - We utilize the server to keep track of objects in the world via their 
+transformation matrices so that multiple players can play together. If one player destroys 
+an asteroid, the asteroid array is updated and sent to the server which then sends the array 
+to all other clients. This allows us to maintain consistency in the world and enable multiplayer.
