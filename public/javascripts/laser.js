@@ -66,7 +66,7 @@ Laser.prototype.draw = function(gl, shaderProgram) {
 	gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0);
 }
 
-Laser.prototype.shoot = function(vertRad, horizRad, cameraX, cameraY, cameraZ) {
+Laser.prototype.shoot = function(vertRad, horizRad, cameraX, cameraY, cameraZ, laserID, myID) {
 	// limit fire rate
 	var currentTime = (new Date).getTime();
 	if (currentTime - this.lastFireTime >= 200) {
@@ -74,8 +74,9 @@ Laser.prototype.shoot = function(vertRad, horizRad, cameraX, cameraY, cameraZ) {
 		var bulletMatrix = mat4.create();
 		mat4.identity(bulletMatrix);
 		mat4.translate(bulletMatrix, bulletMatrix, [-cameraX, -cameraY, -cameraZ]);
-		this.bullets.push([bulletMatrix, vertRad, horizRad, 0]);
-		this.lastFireTime = currentTime;
+		this.bullets.push([bulletMatrix, vertRad, horizRad, 0, laserID]);
+		if(laserID === myID)
+			this.lastFireTime = currentTime;
 	}
 }
 
