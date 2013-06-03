@@ -246,7 +246,7 @@
 
 	// update other players on your position 10x a second
 	setInterval(function() {
-		socket.emit('update', {position: [xPos, yPos, zPos], id: id});
+		socket.emit('update', {position: [-xPos, -yPos, -zPos], id: id});
 	}, 1000 / 10);
 
 	socket.on('init', function (data) {
