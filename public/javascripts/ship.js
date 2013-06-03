@@ -111,10 +111,10 @@ Ship.prototype.initBuffers = function(gl, shaderProgram) {
 	this.colorBuffer.numItems = 30;
 	
 	//normals for point light source
-	pyramidVertexNormalBuffer = gl.createBuffer();
-	gl.bindBuffer(gl.ARRAY_BUFFER, pyramidVertexNormalBuffer);
+	this.pyramidVertexNormalBuffer = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, this.pyramidVertexNormalBuffer);
 	
-	var vertexNormals = [
+	this.vertexNormals = [
 	// Front face
 	 0.0,  -0.9701,  .2425,
 	 0.0,  -0.9701,  .2425,
@@ -156,10 +156,10 @@ Ship.prototype.initBuffers = function(gl, shaderProgram) {
 	0,0,1,
 	 0,0,1
 	];
-	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexNormals), gl.STATIC_DRAW);
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertexNormals), gl.STATIC_DRAW);
 	
-	pyramidVertexNormalBuffer.itemSize = 3;
-	pyramidVertexNormalBuffer.numItems = 30;
+	this.pyramidVertexNormalBuffer.itemSize = 3;
+	this.pyramidVertexNormalBuffer.numItems = 30;
         
         
 }
@@ -172,8 +172,8 @@ Ship.prototype.draw = function(gl, shaderProgram) {
 	gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, this.colorBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
     //normals for the pyramid
-    gl.bindBuffer(gl.ARRAY_BUFFER, pyramidVertexNormalBuffer);
-    gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, pyramidVertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.pyramidVertexNormalBuffer);
+    gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, this.pyramidVertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
     
     //ambient lighting
     gl.uniform3f(

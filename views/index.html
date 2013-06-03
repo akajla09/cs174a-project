@@ -38,8 +38,8 @@
 		}
 		// render player
 		else if (renderType == 3) {
-			//vec4 textureColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
-			//gl_FragColor = vec4(textureColor.rgb * vLightWeighting, textureColor.a);
+			vec4 textureColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
+			gl_FragColor = vec4(textureColor.rgb * vLightWeighting, textureColor.a);
 			gl_FragColor = vec4(0.5, 0.5, 0.5, 1.0);
 		}
 	}
@@ -184,6 +184,11 @@
 	function setMatrixUniforms() {
 		gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
 		gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
+		
+		//var normalMatrix = mat3.create();
+		//mat4.toInverseMat3(mvMatrix, normalMatrix);
+		//mat3.transpose(normalMatrix);
+		//gl.uniformMatrix3fv(shaderProgram.nMatrixUniform, false, normalMatrix);
 	}
 
 	function degreesToRadians(degrees) {
