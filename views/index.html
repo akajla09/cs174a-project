@@ -22,7 +22,9 @@
 
 	void main(void) {
 		if (renderType == 0) {
-			gl_FragColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
+			vec4 textureColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
+			gl_FragColor = vec4(textureColor.rgb * vLightWeighting, textureColor.a);
+			//gl_FragColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
 		}
 		// render laser
 		else if (renderType == 1) {
@@ -42,6 +44,7 @@
 
 <script id="shader-vs" type="x-shader/x-vertex">
 	attribute vec3 aVertexPosition;
+	attribute vec3 aVertexNormal;
 	attribute vec2 aTextureCoord;
 
 	uniform mat4 uMVMatrix;
@@ -49,20 +52,25 @@
 	uniform int renderType;
 
 	varying vec2 vTextureCoord;
+	varying vec3 vLightWeighting;
+
     //used for ambient lighting
 	uniform mat3 uNMatrix;
 	uniform vec3 uAmbientColor;
+
 	uniform vec3 uLightingDirection;
 	uniform vec3 uDirectionalColor;
-	varying vec3 vLightWeighting;
-	attribute vec3 aVertexNormal;
 	
   uniform bool uUseLighting;
     
 	void main(void) {
 		gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+		// Additional options for asteroid rendering
 		if (renderType == 0) {
 			vTextureCoord = aTextureCoord;
+			vec3 transformedNormal = uNMatrix * aVertexNormal;
+			float directionalLightWeighting = max(dot(transformedNormal, uLightingDirection), 0.0);
+			vLightWeighting = uAmbientColor + uDirectionalColor * directionalLightWeighting;
 		}
 		if (renderType == 3) {
 			vTextureCoord = aTextureCoord;
@@ -150,10 +158,19 @@
 		shaderProgram.textureCoordAttribute = gl.getAttribLocation(shaderProgram, "aTextureCoord");
 		gl.enableVertexAttribArray(shaderProgram.textureCoordAttribute);
 
+		shaderProgram.vertexNormalAttribute = gl.getAttribLocation(shaderProgram, "aVertexNormal");
+		gl.enableVertexAttribArray(shaderProgram.vertexNormalAttribute);
+
 		shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
 		shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
+		shaderProgram.nMatrixUniform = gl.getUniformLocation(shaderProgram, "uNMatrix");
 		shaderProgram.samplerUniform = gl.getUniformLocation(shaderProgram, "uSampler");
 		shaderProgram.renderType = gl.getUniformLocation(shaderProgram, "renderType");
+
+		shaderProgram.useLightingUniform = gl.getUniformLocation(shaderProgram, "uUseLighting");
+		shaderProgram.ambientColorUniform = gl.getUniformLocation(shaderProgram, "uAmbientColor");
+		shaderProgram.lightingDirectionUniform = gl.getUniformLocation(shaderProgram, "uLightingDirection");
+		shaderProgram.directionalColorUniform = gl.getUniformLocation(shaderProgram, "uDirectionalColor");
 	}
 
 

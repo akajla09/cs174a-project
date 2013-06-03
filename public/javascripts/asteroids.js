@@ -73,10 +73,20 @@ Asteroid.prototype.initBuffers = function(gl, shaderProgram) {
 }
 
 Asteroid.prototype.draw = function(gl, shaderProgram, texture) {
+	// Lighting elements
+	gl.uniform1i(shaderProgram.useLightingUniform, 1);
+	gl.uniform3f(shaderProgram.ambientColorUniform, 0.8, 0.8, 0.8);
+	var lightingDirection = [50.0, 0.0, 0.0];
+	var adjustedLD = vec3.create();
+	vec3.normalize(lightingDirection, adjustedLD);
+	vec3.scale(adjustedLD, -1);
+	gl.uniform3fv(shaderProgram.lightingDirectionUniform, adjustedLD);
+	gl.uniform3f(shaderProgram.directionalColorUniform, 1.0, 1.0, 1.0);
+
 	gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
 	gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
-	/*gl.bindBuffer(gl.ARRAY_BUFFER, this.normalBuffer);
-	gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, 3, gl.FLOAT, false, 0, 0);*/
+	gl.bindBuffer(gl.ARRAY_BUFFER, this.normalBuffer);
+	gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, 3, gl.FLOAT, false, 0, 0);
 	gl.bindBuffer(gl.ARRAY_BUFFER, this.textureCoordBuffer);
 	gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, 2, gl.FLOAT, false, 0, 0);
 	gl.activeTexture(gl.TEXTURE0);
