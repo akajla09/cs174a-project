@@ -82,7 +82,7 @@ Laser.prototype.shoot = function(vertRad, horizRad, cameraX, cameraY, cameraZ) {
 Laser.prototype.removeBullets = function() {
 	for (var i = 0; i < this.bullets.length; i++) {
 		// Remove bullet if it has been alive for 15 ticks
-		if (this.bullets[i][3] >= 15) {
+		if (this.bullets[i][3] >= 100) {
 			this.bullets.splice(i, 1);
 		}
 	}
@@ -96,21 +96,21 @@ Laser.prototype.removeBullets = function() {
 
 var crosshairVertices = [
 	// top triangle
-	0.0, 0.015, 0.0,
-	0.015, 0.1, 0.0,
-	-0.015, 0.1, 0.0,
+	0.0, 0.02, 0.0,
+	0.005, 0.04, 0.0,
+	-0.005, 0.04, 0.0,
 	// left triangle
-	-0.015, 0.0, 0.0,
-	-0.08, 0.02, 0.0,
-	-0.08, -0.02, 0.0,
+	-0.005, 0.0, 0.0,
+	-0.03, 0.005, 0.0,
+	-0.03, -0.005, 0.0,
 	// bottom triangle
-	0.0, -0.015, 0.0,
-	-0.015, -0.1, 0.0,
-	0.015, -0.1, 0.0,
+	0.0, -0.02, 0.0,
+	-0.005, -0.04, 0.0,
+	0.005, -0.04, 0.0,
 	// right triangle
-	0.015, 0.0, 0.0,
-	0.08, 0.02, 0.0,
-	0.08, -0.02, 0.0
+	0.005, 0.0, 0.0,
+	0.03, 0.005, 0.0,
+	0.03, -0.005, 0.0
 ];
 
 function Crosshair() {

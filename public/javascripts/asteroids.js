@@ -73,10 +73,20 @@ Asteroid.prototype.initBuffers = function(gl, shaderProgram) {
 }
 
 Asteroid.prototype.draw = function(gl, shaderProgram, texture) {
+	// Lighting elements
+	gl.uniform1i(shaderProgram.useLightingUniform, 1);
+	gl.uniform3f(shaderProgram.ambientColorUniform, 0.8, 0.8, 0.8);
+	var lightingDirection = [50.0, 0.0, 0.0];
+	var adjustedLD = vec3.create();
+	vec3.normalize(lightingDirection, adjustedLD);
+	vec3.scale(adjustedLD, -1);
+	gl.uniform3fv(shaderProgram.lightingDirectionUniform, adjustedLD);
+	gl.uniform3f(shaderProgram.directionalColorUniform, 1.0, 1.0, 1.0);
+
 	gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
 	gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
-	/*gl.bindBuffer(gl.ARRAY_BUFFER, this.normalBuffer);
-	gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, 3, gl.FLOAT, false, 0, 0);*/
+	gl.bindBuffer(gl.ARRAY_BUFFER, this.normalBuffer);
+	gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, 3, gl.FLOAT, false, 0, 0);
 	gl.bindBuffer(gl.ARRAY_BUFFER, this.textureCoordBuffer);
 	gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, 2, gl.FLOAT, false, 0, 0);
 	gl.activeTexture(gl.TEXTURE0);
@@ -101,7 +111,7 @@ Asteroid.prototype.parseAsteroidField = function(data) {
 	return asteroidArray;
 }
 
-Asteroid.prototype.checkCollisions = function(bulletPos, asteroidArray) {
+Asteroid.prototype.checkCollisions = function(bulletIndex, bullets, bulletPos, asteroidArray, callback) {
 	var score = 0;
 	for (var i = 0; i < this.collisionArray.length; i++) {
 		var trans = this.collisionArray[i].trans;
@@ -127,6 +137,8 @@ Asteroid.prototype.checkCollisions = function(bulletPos, asteroidArray) {
 			score += 10;
 			this.collisionArray.splice(i, 1);
 			asteroidArray.splice(i, 1);
+			bullets.splice(bulletIndex, 1);
+			callback(asteroidArray);
 		}
 	}
 	return score;

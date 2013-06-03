@@ -111,48 +111,55 @@ Ship.prototype.initBuffers = function(gl, shaderProgram) {
 	this.colorBuffer.numItems = 30;
 	
 	//normals for point light source
-	cubeVertexNormalBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexNormalBuffer);
-        var vertexNormals = [
-            // Front face
-             0.0,  0.0,  1.0,
-             0.0,  0.0,  1.0,
-             0.0,  0.0,  1.0,
-             0.0,  0.0,  1.0,
-
-            // Back face
-             0.0,  0.0, -1.0,
-             0.0,  0.0, -1.0,
-             0.0,  0.0, -1.0,
-             0.0,  0.0, -1.0,
-
-            // Top face
-             0.0,  1.0,  0.0,
-             0.0,  1.0,  0.0,
-             0.0,  1.0,  0.0,
-             0.0,  1.0,  0.0,
-
-            // Bottom face
-             0.0, -1.0,  0.0,
-             0.0, -1.0,  0.0,
-             0.0, -1.0,  0.0,
-             0.0, -1.0,  0.0,
-
-            // Right face
-             1.0,  0.0,  0.0,
-             1.0,  0.0,  0.0,
-             1.0,  0.0,  0.0,
-             1.0,  0.0,  0.0,
-
-            // Left face
-            -1.0,  0.0,  0.0,
-            -1.0,  0.0,  0.0,
-            -1.0,  0.0,  0.0,
-            -1.0,  0.0,  0.0
-        ];
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexNormals), gl.STATIC_DRAW);
-        cubeVertexNormalBuffer.itemSize = 3;
-        cubeVertexNormalBuffer.numItems = 24;
+	pyramidVertexNormalBuffer = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, pyramidVertexNormalBuffer);
+	
+	var vertexNormals = [
+	// Front face
+	 0.0,  -0.9701,  .2425,
+	 0.0,  -0.9701,  .2425,
+	 0.0,  -0.9701,  .2425,
+	// Right face
+	 0.2154,  -0.9333,  .2871,
+	 0.2154,  -0.9333,  .2871,
+	 0.2154,  -0.9333,  .2871,
+	//
+	 0.2154,  0.9333,  .2871,
+	 0.2154,  0.9333,  .2871,
+	 0.2154,  0.9333,  .2871,
+	// Back face
+	 0.0,  0.9701,  .2325,
+	 0.0,  0.9701,  .2325,
+	 0.0,  0.9701,  .2325,
+	// Left face
+	 -.2154,  0.9333,  .2871,
+	-.2154,  0.9333,  .2871,
+	-.2154,  0.9333,  .2871,
+	 // 
+	 -0.2153,  -0.9333,  .2871,
+	-0.2153,  -0.9333,  .2871,
+	-0.2153,  -0.9333,  .2871,
+	// Bottom Right cross products for this will be zero
+	 0,0,0,
+	 0,0,0,
+	 0,0,0,
+	// Bottom Left: 
+	-.3162,  0.0,  0.9487,
+	-.3162,  0.0,  0.9487,
+	-.3162,  0.0,  0.9487,
+	// Bottom
+	 0,0,1,
+	 0,0,1,
+	 0,0,1,
+	//
+	0,0,1,
+	0,0,1,
+	 0,0,1
+	];
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexNormals), gl.STATIC_DRAW);
+	
+	pyramidVertexNormalBuffer.itemSize = 3;
+	pyramidVertexNormalBuffer.numItems = 24;
         
         
 }
@@ -165,8 +172,8 @@ Ship.prototype.draw = function(gl, shaderProgram) {
 	gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, this.colorBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
     //normals for the pyramid
-    gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexNormalBuffer);
-    gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, cubeVertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, pyramidVertexNormalBuffer);
+    gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, pyramidVertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
     
     //ambient lighting
     gl.uniform3f(

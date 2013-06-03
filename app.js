@@ -63,5 +63,13 @@ io.sockets.on('connection', function(socket) {
   socket.on('update', function(data) {
     io.sockets.emit('update', data);
   });
+
+  socket.on('shoot', function(data) {
+    io.sockets.emit('shoot', data);
+  });
+
+  socket.on('update_asteroids', function(data) {
+    asteroids = data;
+  });
 });
 
