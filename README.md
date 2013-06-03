@@ -4,10 +4,10 @@ cs174a-project
 Project implementation details included in report.txt
 
 Group Members:
-Aditya Kajla
-Greg Rivera
-Alexander Leung
-Kevin Tseng
+    Aditya Kajla
+    Greg Rivera
+    Alexander Leung
+    Kevin Tseng
 
 
 To setup:
