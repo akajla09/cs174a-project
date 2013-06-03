@@ -271,7 +271,7 @@
 		for (var i = 0; i < laser.bullets.length; i++) {
 			var bulletTrans = laser.bullets[i][0];
 			var bulletPos = [bulletTrans[12], bulletTrans[13], bulletTrans[14]];
-			score += asteroid.checkCollisions(bulletPos, asteroidArray);
+			score += asteroid.checkCollisions(i, laser.bullets, bulletPos, asteroidArray);
 		}
 		updateScore(score);
 
