@@ -233,6 +233,10 @@
 		asteroidArray = asteroid.parseAsteroidField(data.asteroids);
 	});
 
+	socket.on('shoot', function(data) {
+		laser.shoot(data[0], data[1], data[2], data[3], data[4]);
+	});
+
 	socket.on('update', function(data) { 
 		if(data.id !== id && data.id !== 0) {
 			// update ship coordinates
@@ -401,7 +405,8 @@
 		}
 		// shoot (spacebar)
 		if (pressedKeys[32]) {
-			laser.shoot(vertRad, horizRad, xPos, yPos, zPos); 
+			laser.shoot(vertRad, horizRad, xPos, yPos, zPos);
+			socket.emit('shoot', [ vertRad, horizRad, xPos, yPos, zPos]); 
 		}
 	}
 
