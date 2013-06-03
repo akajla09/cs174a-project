@@ -2,6 +2,8 @@
 
 <head>
 <title>Asteroids with Friends</title>
+<LINK REL="stylesheet" TYPE="text/css" HREF="/stylesheets/style.css">
+
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 
 <script type="text/javascript" src="/socket.io/socket.io.js"></script>
@@ -456,13 +458,13 @@
 
 </head>
 
-<body onload="webGLStart();" style="background-color: #181818;">
+<body onload="webGLStart();">
 	<div id="main-div" align="center">
-		<canvas id="game-canvas" style="border: none;" width="1000" height="600" align="center"></canvas>
-		<div id="score-div" style="color: red; font-size: 30px; font-family: impact;">
+		<canvas id="game-canvas" width="1000" height="600" align="center"></canvas>
+		<div id="score-div">
 			SCORE: --
 		</div>
-		<div id="instructions-div" style="color: white;"></br>
+		<div id="instructions-div"></br>
 				<b><i>Instructions: </i></b></br>
 				Move forward: z </br>
 				Move backward: x </br>
