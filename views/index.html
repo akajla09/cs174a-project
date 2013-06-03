@@ -396,34 +396,34 @@
 		// UP
 		if (pressedKeys[38]) {
 			if (-vertAngle < 90.0)
-				vertAngle += -1.0;
+				vertAngle += -1.5;
 		}
 		// DOWN
 		if (pressedKeys[40]) {
 			if (vertAngle < 90.0)
-				vertAngle += 1.0;
+				vertAngle += 1.5;
 		}
 		// LEFT
 		if (pressedKeys[37]) {
-			horizAngle += -1.0;
+			horizAngle += -1.5;
 		}
 		// RIGHT
 		if (pressedKeys[39]) {
-			horizAngle += 1.0;
+			horizAngle += 1.5;
 		}
 		// move forward (z)
 		if (pressedKeys[90]) {
-			xPos += Math.sin(horizRad) * 1.9;
-			yPos += Math.sin(vertRad) * -1.9;
+			xPos += Math.sin(horizRad) * 3;
+			yPos -= Math.sin(vertRad) * 3;
 			if (vertAngle > -90.0 && vertAngle < 90.0)
-				zPos += Math.cos(horizRad) * 1.9;
+				zPos += Math.cos(horizRad) * 3;
 		}
 		// move backward (x)
 		if (pressedKeys[88]) {
-			xPos += Math.sin(horizRad) * -1.9;
-			yPos += Math.sin(vertRad) * 1.9;
+			xPos -= Math.sin(horizRad) * 3;
+			yPos += Math.sin(vertRad) * 3;
 			if (vertAngle > -90.0 && vertAngle < 90.0)
-				zPos += Math.cos(horizRad) * -1.9;
+				zPos -= Math.cos(horizRad) * 3;
 		}
 		// shoot (spacebar)
 		if (pressedKeys[32]) {
