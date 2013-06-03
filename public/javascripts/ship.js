@@ -159,7 +159,7 @@ Ship.prototype.initBuffers = function(gl, shaderProgram) {
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexNormals), gl.STATIC_DRAW);
 	
 	pyramidVertexNormalBuffer.itemSize = 3;
-	pyramidVertexNormalBuffer.numItems = 24;
+	pyramidVertexNormalBuffer.numItems = 30;
         
         
 }
