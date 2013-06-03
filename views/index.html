@@ -2,6 +2,8 @@
 
 <head>
 <title>Asteroids with Friends</title>
+<LINK REL="stylesheet" TYPE="text/css" HREF="/stylesheets/style.css">
+
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 
 <script type="text/javascript" src="/socket.io/socket.io.js"></script>
@@ -293,8 +295,8 @@
 		for (var i = 0; i < laser.bullets.length; i++) {
 			var bulletTrans = laser.bullets[i][0];
 			var bulletPos = [bulletTrans[12], bulletTrans[13], bulletTrans[14]];
-			score += asteroid.checkCollisions(i, laser.bullets, bulletPos, asteroidArray, function(asteroid_array) {
-				socket.emit('update_asteroids', asteroid_array);
+			score += asteroid.checkCollisions(i, laser.bullets, bulletPos, asteroidArray, function(asteroid_id) {
+				socket.emit('remove', asteroid_id);
 			});
 		}
 		updateScore(score);
@@ -394,34 +396,34 @@
 		// UP
 		if (pressedKeys[38]) {
 			if (-vertAngle < 90.0)
-				vertAngle += -1.0;
+				vertAngle += -1.5;
 		}
 		// DOWN
 		if (pressedKeys[40]) {
 			if (vertAngle < 90.0)
-				vertAngle += 1.0;
+				vertAngle += 1.5;
 		}
 		// LEFT
 		if (pressedKeys[37]) {
-			horizAngle += -1.0;
+			horizAngle += -1.5;
 		}
 		// RIGHT
 		if (pressedKeys[39]) {
-			horizAngle += 1.0;
+			horizAngle += 1.5;
 		}
 		// move forward (z)
 		if (pressedKeys[90]) {
-			xPos += Math.sin(horizRad) * 1.9;
-			yPos += Math.sin(vertRad) * -1.9;
+			xPos += Math.sin(horizRad) * 3;
+			yPos -= Math.sin(vertRad) * 3;
 			if (vertAngle > -90.0 && vertAngle < 90.0)
-				zPos += Math.cos(horizRad) * 1.9;
+				zPos += Math.cos(horizRad) * 3;
 		}
 		// move backward (x)
 		if (pressedKeys[88]) {
-			xPos += Math.sin(horizRad) * -1.9;
-			yPos += Math.sin(vertRad) * 1.9;
+			xPos -= Math.sin(horizRad) * 3;
+			yPos += Math.sin(vertRad) * 3;
 			if (vertAngle > -90.0 && vertAngle < 90.0)
-				zPos += Math.cos(horizRad) * -1.9;
+				zPos -= Math.cos(horizRad) * 3;
 		}
 		// shoot (spacebar)
 		if (pressedKeys[32]) {
@@ -456,13 +458,13 @@
 
 </head>
 
-<body onload="webGLStart();" style="background-color: #181818;">
+<body onload="webGLStart();">
 	<div id="main-div" align="center">
-		<canvas id="game-canvas" style="border: none;" width="1000" height="600" align="center"></canvas>
-		<div id="score-div" style="color: red; font-size: 30px; font-family: impact;">
+		<canvas id="game-canvas" width="1000" height="600" align="center"></canvas>
+		<div id="score-div">
 			SCORE: --
 		</div>
-		<div id="instructions-div" style="color: white;"></br>
+		<div id="instructions-div"></br>
 				<b><i>Instructions: </i></b></br>
 				Move forward: z </br>
 				Move backward: x </br>
