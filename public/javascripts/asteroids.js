@@ -101,7 +101,7 @@ Asteroid.prototype.parseAsteroidField = function(data) {
 	return asteroidArray;
 }
 
-Asteroid.prototype.checkCollisions = function(bulletPos, asteroidArray) {
+Asteroid.prototype.checkCollisions = function(bulletPos, asteroidArray, callback) {
 	var score = 0;
 	for (var i = 0; i < this.collisionArray.length; i++) {
 		var trans = this.collisionArray[i].trans;
@@ -127,6 +127,7 @@ Asteroid.prototype.checkCollisions = function(bulletPos, asteroidArray) {
 			score += 10;
 			this.collisionArray.splice(i, 1);
 			asteroidArray.splice(i, 1);
+			callback(asteroidArray);
 		}
 	}
 	return score;
