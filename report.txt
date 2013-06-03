@@ -18,9 +18,8 @@ the world. Utilizing a variety of camera transformations (rotations & translatio
 we were able to implement a camera navigation system controllable via the keyboard.
 
 Lighting - The game utilizes ambient and directional lighting for the asteroid field. 
-A light source displaced away from the asteroids functions as a light source to add the 
-effect of a dim sun in space. The lighting implementation procedure is adapted 
-from learningwebgl.com.
+A light source placed far away from the asteroids adds the effect of a dim sun in space. 
+The lighting implementation procedure is adapted from learningwebgl.com.
 
 Textures - All asteroids have a common texture (image file) applied to them via the 
 shaders in order to add color details and realism. The texture implementation 
