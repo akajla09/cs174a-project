@@ -233,6 +233,10 @@
 		asteroidArray = asteroid.parseAsteroidField(data.asteroids);
 	});
 
+	socket.on('shoot', function(data) {
+		laser.shoot(data[0], data[1], data[2], data[3], data[4]);
+	});
+
 	socket.on('update', function(data) { 
 		if(data.id !== id && data.id !== 0) {
 			// update ship coordinates
@@ -271,7 +275,9 @@
 		for (var i = 0; i < laser.bullets.length; i++) {
 			var bulletTrans = laser.bullets[i][0];
 			var bulletPos = [bulletTrans[12], bulletTrans[13], bulletTrans[14]];
-			score += asteroid.checkCollisions(i, laser.bullets, bulletPos, asteroidArray);
+			score += asteroid.checkCollisions(i, laser.bullets, bulletPos, asteroidArray, function(asteroid_array) {
+				socket.emit('update_asteroids', asteroid_array);
+			});
 		}
 		updateScore(score);
 
@@ -401,7 +407,8 @@
 		}
 		// shoot (spacebar)
 		if (pressedKeys[32]) {
-			laser.shoot(vertRad, horizRad, xPos, yPos, zPos); 
+			laser.shoot(vertRad, horizRad, xPos, yPos, zPos);
+			socket.emit('shoot', [ vertRad, horizRad, xPos, yPos, zPos]); 
 		}
 	}
 
