@@ -61,6 +61,9 @@
 	uniform mat3 uNMatrix;
 	uniform vec3 uAmbientColor;
 
+	uniform vec3 uPointLightingLocation;
+	uniform vec3 uPointLightingColor;
+
 	uniform vec3 uLightingDirection;
 	uniform vec3 uDirectionalColor;
 	
@@ -68,12 +71,14 @@
     
 	void main(void) {
 		gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
-		// Additional options for asteroid rendering
+		// Additional options for asteroid rendering (point light source & ambient lighting)
 		if (renderType == 0) {
+			vec4 mvPosition = uMVMatrix * vec4(aVertexPosition, 1.0);
 			vTextureCoord = aTextureCoord;
+			vec3 lightDirection = normalize(uPointLightingLocation - mvPosition.xyz);
 			vec3 transformedNormal = uNMatrix * aVertexNormal;
-			float directionalLightWeighting = max(dot(transformedNormal, uLightingDirection), 0.0);
-			vLightWeighting = uAmbientColor + uDirectionalColor * directionalLightWeighting;
+			float directionalLightWeighting = max(dot(transformedNormal, lightDirection), 0.0);
+			vLightWeighting = uAmbientColor + uPointLightingColor * directionalLightWeighting;
 		}
 		// Additional options for player rendering
 		if (renderType == 3) {
@@ -170,6 +175,8 @@
 		shaderProgram.nMatrixUniform = gl.getUniformLocation(shaderProgram, "uNMatrix");
 		shaderProgram.samplerUniform = gl.getUniformLocation(shaderProgram, "uSampler");
 		shaderProgram.renderType = gl.getUniformLocation(shaderProgram, "renderType");
+		shaderProgram.pointLightingLocationUniform = gl.getUniformLocation(shaderProgram, "uPointLightingLocation");
+		shaderProgram.pointLightingColorUniform = gl.getUniformLocation(shaderProgram, "uPointLightingColor");
 
 		shaderProgram.useLightingUniform = gl.getUniformLocation(shaderProgram, "uUseLighting");
 		shaderProgram.ambientColorUniform = gl.getUniformLocation(shaderProgram, "uAmbientColor");
