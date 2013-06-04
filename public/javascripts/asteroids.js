@@ -79,12 +79,6 @@ Asteroid.prototype.draw = function(gl, shaderProgram, texture) {
 	gl.uniform3f(shaderProgram.ambientColorUniform, 0.8, 0.8, 0.6);
 	gl.uniform3f(shaderProgram.pointLightingLocationUniform, 150.0, 100.0, 150.0);
 	gl.uniform3f(shaderProgram.pointLightingColorUniform, 1.0, 1.0, 1.0);
-	//var lightingDirection = [20.0, 0.0, 0.0];
-	//var adjustedLD = vec3.create();
-	//vec3.normalize(adjustedLD, lightingDirection);
-	//vec3.scale(adjustedLD, adjustedLD, -1);
-	//gl.uniform3fv(shaderProgram.lightingDirectionUniform, adjustedLD);
-	//gl.uniform3f(shaderProgram.directionalColorUniform, 1.0, 1.0, 1.0);
 	// Bind buffers
 	gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
 	gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);

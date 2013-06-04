@@ -445,19 +445,11 @@
 		}
 		// move forward (z)
 		if (pressedKeys[90]) {
-			/*xPos += Math.sin(horizRad) * 3;
-			yPos -= Math.sin(vertRad) * 3;
-			if (vertAngle > -90.0 && vertAngle < 90.0)
-				zPos += Math.cos(horizRad) * 3;*/
 			if (acceleration < 5.0)
 				acceleration += 0.1;
 		}
 		// move backward (x)
 		if (pressedKeys[88]) {
-			/*xPos -= Math.sin(horizRad) * 3;
-			yPos += Math.sin(vertRad) * 3;
-			if (vertAngle > -90.0 && vertAngle < 90.0)
-				zPos -= Math.cos(horizRad) * 3;*/
 			if (acceleration > -5.0)
 				acceleration -= 0.1;
 		}
