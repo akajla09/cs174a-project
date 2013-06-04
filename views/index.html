@@ -254,6 +254,7 @@
 	var horizAngle = 0.0;
 	var asteroidArray = [];
 	var zbulletPos = 160.0;
+	var acceleration = 0.0;
 	var socket = io.connect('http://localhost'); 
 
 	// update other players on your position 10x a second
@@ -372,6 +373,18 @@
 		// Animation
 		var currentTime = (new Date).getTime();
 		if (currentTime - lastTime >= 10) {
+			// Move player based on acceleration and heading
+			var vertRad = degreesToRadians(-vertAngle);
+			var horizRad = degreesToRadians(-horizAngle);
+			xPos += Math.sin(horizRad) * acceleration;
+			yPos -= Math.sin(vertRad) * acceleration;
+			if (vertAngle > -90.0 && vertAngle < 90.0)
+				zPos += Math.cos(horizRad) * acceleration;
+			if (acceleration > 0)
+				acceleration -= 0.02;
+			if (acceleration < 0)
+				acceleration += 0.02;
+
 			var change = currentTime - lastTime;
 			rPyramid += (50 * change)/1000; // ship rotation
 			if (rPyramid > 90) rPyramid -= 90;
@@ -408,12 +421,13 @@
 		var horizRad = degreesToRadians(-horizAngle);
 		// UP
 		if (pressedKeys[38]) {
-			if (-vertAngle < 90.0)
+			if (-vertAngle < 65.0)
 				vertAngle += -1.5;
+			console.log(vertAngle);
 		}
 		// DOWN
 		if (pressedKeys[40]) {
-			if (vertAngle < 90.0)
+			if (vertAngle < 65.0)
 				vertAngle += 1.5;
 		}
 		// LEFT
@@ -426,17 +440,21 @@
 		}
 		// move forward (z)
 		if (pressedKeys[90]) {
-			xPos += Math.sin(horizRad) * 3;
+			/*xPos += Math.sin(horizRad) * 3;
 			yPos -= Math.sin(vertRad) * 3;
 			if (vertAngle > -90.0 && vertAngle < 90.0)
-				zPos += Math.cos(horizRad) * 3;
+				zPos += Math.cos(horizRad) * 3;*/
+			if (acceleration < 5.0)
+				acceleration += 0.1;
 		}
 		// move backward (x)
 		if (pressedKeys[88]) {
-			xPos -= Math.sin(horizRad) * 3;
+			/*xPos -= Math.sin(horizRad) * 3;
 			yPos += Math.sin(vertRad) * 3;
 			if (vertAngle > -90.0 && vertAngle < 90.0)
-				zPos -= Math.cos(horizRad) * 3;
+				zPos -= Math.cos(horizRad) * 3;*/
+			if (acceleration > -5.0)
+				acceleration -= 0.1;
 		}
 		// shoot (spacebar)
 		if (pressedKeys[32]) {
